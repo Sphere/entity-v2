@@ -15,7 +15,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,23 +22,23 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "competency_level")
 public class CompetencyLevel {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "code", referencedColumnName = "code", nullable = false),
-            @JoinColumn(name = "language_code", referencedColumnName = "language_code", nullable = false)
-    })
-    private MasterEntity masterEntity;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumns({
+    @JoinColumn(name = "code", referencedColumnName = "code", nullable = false),
+    @JoinColumn(name = "language_code", referencedColumnName = "language_code", nullable = false)
+  })
+  private MasterEntity masterEntity;
 
-    @Column(name = "level_number")
-    private Integer levelNumber;
+  @Column(name = "level_number")
+  private Integer levelNumber;
 
-    @Column(name = "level_name")
-    private String levelName;
+  @Column(name = "level_name")
+  private String levelName;
 
-    @Column(name = "level_description")
-    private String levelDescription;
+  @Column(name = "level_description")
+  private String levelDescription;
 }
