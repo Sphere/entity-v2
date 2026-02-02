@@ -1,0 +1,95 @@
+spring:
+  application:
+    name: aastrika-entity
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/aastrika_entity}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9207}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
+    connection-timeout: ${ELASTICSEARCH_CONNECTION_TIMEOUT:5s}
+    socket-timeout: ${ELASTICSEARCH_SOCKET_TIMEOUT:30s}
+
+server:
+  port: 8082
+
+logging:
+  level:
+    org.springframework.data.elasticsearch: DEBUG
+    org.hibernate.SQL: OFF
+
+# Entity Sheet header Configuration
+entity-sheet:
+  competency-level-size: 5
+  headers:
+    required:
+      - id
+      - entity_type
+      - name
+      - description
+      - code
+      - language
+    optional:
+      - type
+      - area
+      - level_id
+      - created_by
+      - updated_by
+      - reviewed_by
+      - created_date
+      - updated_date
+      - reviewed_date
+      - additional_properties
+    competency-levels:
+      - competency_level_1_name
+      - competency_level_1_description
+      - competency_level_2_name
+      - competency_level_2_description
+      - competency_level_3_name
+      - competency_level_3_description
+      - competency_level_4_name
+      - competency_level_4_description
+      - competency_level_5_name
+      - competency_level_5_description
+  header-field-mappings:
+    # CSV header → EntitySheetRow field
+    id: entityId
+    entity_type: entityType
+    code: code
+    language: language
+    name: name
+    description: description
+    type: type
+    area: area
+    level_id: levelId
+    created_by: createdBy
+    updated_by: updatedBy
+    reviewed_by: reviewedBy
+    created_date: createdDate
+    updated_date: updatedDate
+    reviewed_date: reviewedDate
+    additional_properties: additionalProperties
+    competency_level_1_name: competencyLevel1Name
+    competency_level_1_description: competencyLevel1Description
+    competency_level_2_name: competencyLevel2Name
+    competency_level_2_description: competencyLevel2Description
+    competency_level_3_name: competencyLevel3Name
+    competency_level_3_description: competencyLevel3Description
+    competency_level_4_name: competencyLevel4Name
+    competency_level_4_description: competencyLevel4Description
+    competency_level_5_name: competencyLevel5Name
+    competency_level_5_description: competencyLevel5Description
