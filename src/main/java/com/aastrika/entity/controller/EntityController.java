@@ -1,7 +1,9 @@
 package com.aastrika.entity.controller;
 
+import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.response.ApiResponse;
 import com.aastrika.entity.model.MasterEntity;
+import com.aastrika.entity.service.MasterEntityEsService;
 import com.aastrika.entity.service.MasterEntityService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class EntityController {
 
   private final MasterEntityService masterEntityService;
+  private final MasterEntityEsService masterEntityEsService;
 
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse> uploadEntitySheet(
       @RequestParam("entitySheet") MultipartFile entitySheet) {
-    ApiResponse apiResponse = masterEntityService.parseEntitySheetV2(entitySheet);
+    ApiResponse apiResponse = masterEntityService.processAndUploadSheet(entitySheet);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
   }
@@ -41,15 +44,6 @@ public class EntityController {
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
 
-  /** Get entity by ID */
-  @GetMapping("/{id}")
-  public ResponseEntity<MasterEntity> getById(@PathVariable Integer id) {
-    return masterEntityService
-        .findById(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-  }
-
   /** Get all entities */
   @GetMapping
   public ResponseEntity<List<MasterEntity>> getAll() {
@@ -57,24 +51,25 @@ public class EntityController {
     return ResponseEntity.ok(entities);
   }
 
+  /** Fuzzy search by name - handles typos and misspellings */
+  @GetMapping("/search/name/fuzzy")
+  public ResponseEntity<List<MasterEntityDocument>> fuzzySearchByName(
+      @RequestParam("name") String name) {
+    List<MasterEntityDocument> results = masterEntityEsService.fuzzyPhraseSearchByName(name);
+    return ResponseEntity.ok(results);
+  }
+
   /** Get entities by type */
   @GetMapping("/type/{type}")
-  public ResponseEntity<List<MasterEntity>> getByType(@PathVariable String type) {
-    List<MasterEntity> entities = masterEntityService.findByType(type);
+  public ResponseEntity<List<MasterEntity>> getByEntityType(@PathVariable String type) {
+    List<MasterEntity> entities = masterEntityService.findByEntityType(type);
     return ResponseEntity.ok(entities);
   }
 
-  /** Get entities by status */
-  @GetMapping("/status/{status}")
-  public ResponseEntity<List<MasterEntity>> getByStatus(@PathVariable String status) {
-    List<MasterEntity> entities = masterEntityService.findByStatus(status);
-    return ResponseEntity.ok(entities);
-  }
-
-  /** Search entities by keyword */
-  @GetMapping("/search")
-  public ResponseEntity<List<MasterEntity>> search(@RequestParam String keyword) {
-    List<MasterEntity> entities = masterEntityService.search(keyword);
+  /** Get entity by code - keep this LAST (generic path variable) */
+  @GetMapping("/code/{code}")
+  public ResponseEntity<List<MasterEntity>> getByCode(@PathVariable String code) {
+    List<MasterEntity> entities = masterEntityService.findByCode(code);
     return ResponseEntity.ok(entities);
   }
 }

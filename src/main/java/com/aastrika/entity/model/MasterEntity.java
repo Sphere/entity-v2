@@ -38,8 +38,14 @@ public class MasterEntity {
   @Column(name = "entity_id", length = 50)
   private String entityId;
 
+  @Column(name = "entity_type", length = 100)
+  private String entityType;
+
   @Column(length = 100)
   private String type;
+
+  @Column(length = 200)
+  private String area;
 
   @Column(length = 500)
   private String name;

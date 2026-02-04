@@ -10,21 +10,28 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(indexName = "master_entities")
+@Document(indexName = "master_entities", writeTypeHint = WriteTypeHint.FALSE)
 public class MasterEntityDocument {
 
-  @Id private Integer id;
+  @Id private String id;
 
   @Field(type = FieldType.Text)
   private String entityId;
 
   @Field(type = FieldType.Keyword)
+  private String entityType;
+
+  @Field(type = FieldType.Keyword)
   private String type;
+
+  @Field(type = FieldType.Keyword)
+  private String code;
 
   @Field(type = FieldType.Text, analyzer = "standard")
   private String name;
@@ -58,4 +65,39 @@ public class MasterEntityDocument {
 
   @Field(type = FieldType.Keyword)
   private String updatedBy;
+
+  // Competency Level 1
+  @Field(type = FieldType.Text, analyzer = "standard")
+  private String competencyLevel1Name;
+
+  @Field(type = FieldType.Text)
+  private String competencyLevel1Description;
+
+  // Competency Level 2
+  @Field(type = FieldType.Text, analyzer = "standard")
+  private String competencyLevel2Name;
+
+  @Field(type = FieldType.Text)
+  private String competencyLevel2Description;
+
+  // Competency Level 3
+  @Field(type = FieldType.Text, analyzer = "standard")
+  private String competencyLevel3Name;
+
+  @Field(type = FieldType.Text)
+  private String competencyLevel3Description;
+
+  // Competency Level 4
+  @Field(type = FieldType.Text, analyzer = "standard")
+  private String competencyLevel4Name;
+
+  @Field(type = FieldType.Text)
+  private String competencyLevel4Description;
+
+  // Competency Level 5
+  @Field(type = FieldType.Text, analyzer = "standard")
+  private String competencyLevel5Name;
+
+  @Field(type = FieldType.Text)
+  private String competencyLevel5Description;
 }

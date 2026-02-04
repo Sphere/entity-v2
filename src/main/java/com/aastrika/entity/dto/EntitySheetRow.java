@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EntitySheetRow {
+  private String rowNumber;
   private String entityId;
   private String entityType;
   private String type;

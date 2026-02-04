@@ -1,12 +1,15 @@
 package com.aastrika.entity.common;
 
-public final class EntitySheetHeaders {
+public final class EntitySheetHeadersConstant {
 
-  private EntitySheetHeaders() {}
 
+
+  private EntitySheetHeadersConstant() {}
+
+  public static final String COMPETENCY_TYPE = "Competency";
   public static final String ENTITY_ID = "id";
   public static final String ENTITY_TYPE = "entity_type";
-  public static final String CODE = "code";
+  public static final String ENTITY_CODE = "code";
   public static final String ID = "id";
   public static final String LANGUAGE = "language";
   public static final String NAME = "name";

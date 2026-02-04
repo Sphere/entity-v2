@@ -1,7 +1,6 @@
 package com.aastrika.entity.reader;
 
-import com.aastrika.entity.common.ApplicationConstants;
-import com.aastrika.entity.common.EntitySheetHeaders;
+import com.aastrika.entity.common.EntitySheetHeadersConstant;
 import com.aastrika.entity.common.MemoryUtil;
 import com.aastrika.entity.config.EntitySheetProperties;
 import com.aastrika.entity.dto.BatchProcessingResult;
@@ -31,7 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.poi.util.StringUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,18 +45,34 @@ public class CsvEntitySheetReader implements EntitySheetReader {
   private final EntitySheetProperties entitySheetProperties;
   private final SheetUtil sheetUtil;
 
-  public void compileEntitySheet(MultipartFile entitySheet) {
+  private String globalEntityType;
+
+  private void setGlobalEntityType(String globalEntityType) {
+    this.globalEntityType = globalEntityType;
+  }
+
+  @Override
+  public String getGlobalEntityType() {
+    return this.globalEntityType;
+  }
+
+  /**
+   * @param entitySheet
+   * @return
+   */
+  public Map<String, List<EntitySheetRow>> getCompiledEntitySheet(MultipartFile entitySheet) {
     log.info("File name: {}", entitySheet.getOriginalFilename());
     MemoryUtil.logMemoryUsage("Before parsing CSV");
 
-    CSVFormat csvFormat =
-        CSVFormat.DEFAULT
-            .builder()
-            .setHeader()
-            .setSkipHeaderRecord(true)
-            .setTrim(true)
-            .setIgnoreEmptyLines(true)
-            .build();
+    Map<String, List<EntitySheetRow>> entitySheetMap = new HashMap<>();
+
+    CSVFormat csvFormat = CSVFormat.DEFAULT
+      .builder()
+      .setHeader()
+      .setSkipHeaderRecord(true)
+      .setTrim(true)
+      .setIgnoreEmptyLines(true)
+      .build();
 
     Map<String, Integer> headerMap = new HashMap<>();
 
@@ -63,30 +80,21 @@ public class CsvEntitySheetReader implements EntitySheetReader {
             new InputStreamReader(entitySheet.getInputStream(), StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         CSVParser csvParser = new CSVParser(bufferedReader, csvFormat)) {
-      MemoryUtil.logMemoryUsage("After creating CSVParser");
 
       List<CSVRecord> csvRecords = csvParser.getRecords();
-      String entityType =
-          getValidatedSheetType(csvParser, csvRecords)
-              .orElseThrow(
-                  () ->
-                      new SheetDataMissingException(
-                          HttpStatus.BAD_REQUEST, "Entity type not present"));
 
-      if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(entityType)) {}
+      String entityType = getValidatedSheetType(csvParser, csvRecords);
+      validateMissingData(csvRecords, entityType);
+      setGlobalEntityType(entityType);
 
       List<EntitySheetRow> entitySheetRows = sheetUtil.mapSheetToEntitySheetRow(csvRecords);
-      List<MasterEntity> masterEntities =
-          entitySheetRows.stream().map(masterEntityMapper::toEntity).toList();
-
-      masterEntityRepository.saveAll(masterEntities);
-      // Elastic search saving
+      entitySheetMap.put(entityType.toUpperCase(), entitySheetRows);
 
       log.info("Record size: {}", csvRecords.size());
-      log.info("Record number: {}", csvParser.getRecordNumber());
+      MemoryUtil.logMemoryUsage("After creating CSVParser");
 
     } catch (UploadEntityException e) {
-      throw new UploadEntityException(HttpStatus.BAD_REQUEST, "Error reading CSV file", headerMap);
+      throw new UploadEntityException(HttpStatus.BAD_REQUEST, "Error reading CSV file ", headerMap);
     } catch (IllegalArgumentException e) {
       throw new UploadEntityException(
           HttpStatus.BAD_REQUEST, e.getMessage(), e.getLocalizedMessage());
@@ -94,12 +102,21 @@ public class CsvEntitySheetReader implements EntitySheetReader {
       throw new UploadEntityException(
           HttpStatus.INTERNAL_SERVER_ERROR, "Error reading CSV file", e.getMessage());
     }
+
+    return entitySheetMap;
   }
 
-  private Optional<String> getValidatedSheetType(CSVParser csvParser, List<CSVRecord> csvRecords) {
+  /**
+   * @param csvParser
+   * @param csvRecords
+   * @return
+   */
+  private @NonNull String getValidatedSheetType(CSVParser csvParser, List<CSVRecord> csvRecords) {
     List<String> headerList = csvParser.getHeaderNames();
 
-    System.out.println("Header list: " + headerList);
+    if (csvRecords == null || csvRecords.isEmpty()) {
+      throw new SheetDataMissingException(HttpStatus.BAD_REQUEST, "There is no data in the sheet");
+    }
 
     if (headerList == null || headerList.isEmpty()) {
       throw new HeaderMissingException(HttpStatus.BAD_REQUEST, "There is no header in the sheet");
@@ -107,114 +124,90 @@ public class CsvEntitySheetReader implements EntitySheetReader {
 
     if (!headerList.containsAll(entitySheetProperties.getHeaders().getRequired())) {
       List<String> remainingHeaderList =
-          entitySheetProperties.getHeaders().getRequired().stream()
-              .filter(header -> !headerList.contains(header))
-              .toList();
+        entitySheetProperties.getHeaders().getRequired().stream()
+          .filter(header -> !headerList.contains(header))
+          .toList();
 
-      throw new HeaderMissingException(
-          HttpStatus.BAD_REQUEST,
-          "Missing required attribute",
-          Map.of("missingAttribute", remainingHeaderList));
-    }
-
-    if (csvRecords == null || csvRecords.isEmpty()) {
-      throw new SheetDataMissingException(HttpStatus.BAD_REQUEST, "There is no data in the sheet");
+      throw new HeaderMissingException(HttpStatus.BAD_REQUEST, "Missing required attributes",
+        Map.of("missingAttribute", remainingHeaderList));
     }
 
     Set<String> entityTypeSet =
-        csvRecords.stream()
-            .map(csvRecord -> csvRecord.get(ApplicationConstants.ENTITY_TYPE))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
+      csvRecords.stream()
+        .map(csvRecord -> csvRecord.get(EntitySheetHeadersConstant.ENTITY_TYPE))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
 
-    String entityType =
-        entityTypeSet.stream()
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new SheetDataMissingException(
-                        HttpStatus.BAD_REQUEST, "Entity type not present"));
+    String entityType = entityTypeSet.stream()
+      .findFirst()
+      .orElseThrow(() -> new SheetDataMissingException(
+        HttpStatus.BAD_REQUEST, "Entity type not present"));
 
     if (entityTypeSet.size() > 1) {
       throw new SheetDataMissingException(
-          HttpStatus.BAD_REQUEST, "Invalid entity type - more than one entity type in sheet");
+        HttpStatus.BAD_REQUEST, "Invalid entity type - missing or more than one entity type in sheet");
     }
 
-    if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(entityType)) {
+    if (EntitySheetHeadersConstant.COMPETENCY_TYPE.equalsIgnoreCase(entityType)) {
       if (!headerList.containsAll(entitySheetProperties.getHeaders().getCompetencyLevels())) {
-        List<String> remainingCompetencyHeaderList =
-            entitySheetProperties.getHeaders().getCompetencyLevels().stream()
-                .filter(header -> !headerList.contains(header))
-                .toList();
+        List<String> remainingCompetencyHeaderList = entitySheetProperties.getHeaders().getCompetencyLevels().stream()
+            .filter(header -> !headerList.contains(header))
+            .toList();
 
-        throw new HeaderMissingException(
-            HttpStatus.BAD_REQUEST,
-            "Missing competency attribute",
-            Map.of("missingAttribute", remainingCompetencyHeaderList));
+        throw new HeaderMissingException(HttpStatus.BAD_REQUEST, "Missing competency attributes",
+          Map.of("missingAttribute", remainingCompetencyHeaderList));
       }
     }
-    return entityTypeSet.stream().findFirst();
+
+    return entityType;
   }
 
-  private EntitySheetRow getEntitySheetRow(CSVRecord csvRecord, String entityType) {
-    EntitySheetRow entitySheetRow = new EntitySheetRow();
+  /**
+   * @param csvRecords
+   * @param entityType
+   */
+  private void validateMissingData(@NonNull List<CSVRecord> csvRecords, @NonNull String entityType) {
+    Map<String, List<Integer>> missingDataMap = new HashMap<>();
+    boolean isCompetencyType = EntitySheetHeadersConstant.COMPETENCY_TYPE.equalsIgnoreCase(entityType);
 
-    List<String> predefinedHeaderList = entitySheetProperties.getHeaders().getRequired();
+    List<String> requiredFields = List.of(
+      EntitySheetHeadersConstant.ENTITY_CODE,
+      EntitySheetHeadersConstant.ENTITY_TYPE,
+      EntitySheetHeadersConstant.NAME,
+      EntitySheetHeadersConstant.DESCRIPTION
+    );
 
-    for (String headerName : predefinedHeaderList) {
-      entitySheetRow.setEntityId(getCellValueOrNull(csvRecord, headerName));
-    }
+    List<String> competencyFields = List.of(
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_1_NAME,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_1_DESCRIPTION,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_2_NAME,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_2_DESCRIPTION,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_3_NAME,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_3_DESCRIPTION,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_4_NAME,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_4_DESCRIPTION,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_5_NAME,
+      EntitySheetHeadersConstant.COMPETENCY_LEVEL_5_DESCRIPTION
+    );
 
-    if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(entityType)) {}
+    for (CSVRecord csvRecord : csvRecords) {
+      int rowNumber = (int) csvRecord.getRecordNumber();
 
-    return entitySheetRow;
-  }
-
-  private String getCellValueOrNull(CSVRecord record, String header) {
-    if (record.isMapped(header)) {
-      String value = record.get(header);
-      return (value != null && !value.isBlank()) ? value : null;
-    }
-    return null;
-  }
-
-  @Override
-  public List<EntitySheetRow> read(MultipartFile file) {
-    compileEntitySheet(file);
-    if (true) return null;
-
-    log.info("Reading CSV file: {}", file.getOriginalFilename());
-    List<EntitySheetRow> entitySheetRows = new ArrayList<>();
-
-    CSVFormat csvFormat =
-        CSVFormat.DEFAULT
-            .builder()
-            .setHeader()
-            .setSkipHeaderRecord(true)
-            .setTrim(true)
-            .setIgnoreEmptyLines(true)
-            .build();
-
-    try (BufferedReader bufferedReader =
-            new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-        CSVParser csvParser = new CSVParser(bufferedReader, csvFormat)) {
-
-      for (CSVRecord record : csvParser) {
-        EntitySheetRow row = mapRecordToRow(record);
-        entitySheetRows.add(row);
+      for (String field : requiredFields) {
+        if (StringUtil.isBlank(csvRecord.get(field)))
+          missingDataMap.computeIfAbsent(field, key -> new ArrayList<>()).add(rowNumber + 1);
       }
-    } catch (Exception e) {
-      throw new RuntimeException("Error reading CSV file", e);
+
+      if (isCompetencyType) {
+        for (String field : competencyFields) {
+          if (StringUtil.isBlank(csvRecord.get(field)))
+            missingDataMap.computeIfAbsent(field, key -> new ArrayList<>()).add(rowNumber + 1);
+        }
+      }
     }
-
-    List<MasterEntity> masterEntities = getMasterEntityList(entitySheetRows);
-
-    masterEntityRepository.saveAll(masterEntities);
-    MemoryUtil.logMemoryUsage("After saving to DB");
-
-    log.info("Read {} rows from CSV", entitySheetRows.size());
-    return entitySheetRows;
+    if (!missingDataMap.isEmpty()) {
+      throw new SheetDataMissingException(HttpStatus.BAD_REQUEST, "Data is missing in sheet", missingDataMap);
+    }
   }
 
   /** Batch processing with error tracking */
@@ -329,36 +322,36 @@ public class CsvEntitySheetReader implements EntitySheetReader {
 
   private EntitySheetRow mapRecordToRow(CSVRecord record) {
     return EntitySheetRow.builder()
-        .entityId(getValueOrNull(record, EntitySheetHeaders.ENTITY_ID))
-        .type(getValueOrNull(record, EntitySheetHeaders.TYPE))
-        .name(getValueOrNull(record, EntitySheetHeaders.NAME))
-        .description(getValueOrNull(record, EntitySheetHeaders.DESCRIPTION))
-        .language(getValueOrNull(record, EntitySheetHeaders.LANGUAGE))
-        .code(getValueOrNull(record, EntitySheetHeaders.CODE))
-        .levelId(getValueOrNull(record, EntitySheetHeaders.LEVEL_ID))
-        .createdBy(getValueOrNull(record, EntitySheetHeaders.CREATED_BY))
-        .updatedBy(getValueOrNull(record, EntitySheetHeaders.UPDATED_BY))
-        .reviewedBy(getValueOrNull(record, EntitySheetHeaders.REVIEWED_BY))
+        .entityId(getValueOrNull(record, EntitySheetHeadersConstant.ENTITY_ID))
+        .type(getValueOrNull(record, EntitySheetHeadersConstant.TYPE))
+        .name(getValueOrNull(record, EntitySheetHeadersConstant.NAME))
+        .description(getValueOrNull(record, EntitySheetHeadersConstant.DESCRIPTION))
+        .language(getValueOrNull(record, EntitySheetHeadersConstant.LANGUAGE))
+        .code(getValueOrNull(record, EntitySheetHeadersConstant.ENTITY_CODE))
+        .levelId(getValueOrNull(record, EntitySheetHeadersConstant.LEVEL_ID))
+        .createdBy(getValueOrNull(record, EntitySheetHeadersConstant.CREATED_BY))
+        .updatedBy(getValueOrNull(record, EntitySheetHeadersConstant.UPDATED_BY))
+        .reviewedBy(getValueOrNull(record, EntitySheetHeadersConstant.REVIEWED_BY))
         //                .createdDate(new Date())
         //                .updatedDate(getValueOrNull(record, EntitySheetHeaders.UPDATED_DATE))
-        .reviewedDate(getValueOrNull(record, EntitySheetHeaders.REVIEWED_DATE))
+        .reviewedDate(getValueOrNull(record, EntitySheetHeadersConstant.REVIEWED_DATE))
         //                .additionalProperties(getValueOrNull(record,
         // EntitySheetHeaders.ADDITIONAL_PROPERTIES))
-        .competencyLevel1Name(getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_1_NAME))
+        .competencyLevel1Name(getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_1_NAME))
         .competencyLevel1Description(
-            getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_1_DESCRIPTION))
-        .competencyLevel2Name(getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_2_NAME))
+            getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_1_DESCRIPTION))
+        .competencyLevel2Name(getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_2_NAME))
         .competencyLevel2Description(
-            getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_2_DESCRIPTION))
-        .competencyLevel3Name(getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_3_NAME))
+            getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_2_DESCRIPTION))
+        .competencyLevel3Name(getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_3_NAME))
         .competencyLevel3Description(
-            getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_3_DESCRIPTION))
-        .competencyLevel4Name(getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_4_NAME))
+            getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_3_DESCRIPTION))
+        .competencyLevel4Name(getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_4_NAME))
         .competencyLevel4Description(
-            getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_4_DESCRIPTION))
-        .competencyLevel5Name(getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_5_NAME))
+            getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_4_DESCRIPTION))
+        .competencyLevel5Name(getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_5_NAME))
         .competencyLevel5Description(
-            getValueOrNull(record, EntitySheetHeaders.COMPETENCY_LEVEL_5_DESCRIPTION))
+            getValueOrNull(record, EntitySheetHeadersConstant.COMPETENCY_LEVEL_5_DESCRIPTION))
         .build();
   }
 

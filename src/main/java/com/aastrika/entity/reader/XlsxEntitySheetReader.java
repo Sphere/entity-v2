@@ -1,6 +1,6 @@
 package com.aastrika.entity.reader;
 
-import com.aastrika.entity.common.EntitySheetHeaders;
+import com.aastrika.entity.common.EntitySheetHeadersConstant;
 import com.aastrika.entity.dto.EntitySheetRow;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class XlsxEntitySheetReader implements EntitySheetReader {
 
   @Override
+  public String getGlobalEntityType() {
+    return "";
+  }
+
+//  @Override
   public List<EntitySheetRow> read(MultipartFile file) {
     log.info("Reading XLSX file: {}", file.getOriginalFilename());
     List<EntitySheetRow> entitySheetRow = new ArrayList<>();
@@ -38,6 +43,11 @@ public class XlsxEntitySheetReader implements EntitySheetReader {
   }
 
   @Override
+  public Map<String, List<EntitySheetRow>> getCompiledEntitySheet(MultipartFile entitySheet) {
+    return Map.of();
+  }
+
+  @Override
   public boolean supports(String contentType, String fileName) {
     return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)
         || (fileName != null && fileName.toLowerCase().endsWith(".xlsx"));
@@ -58,40 +68,40 @@ public class XlsxEntitySheetReader implements EntitySheetReader {
 
   private EntitySheetRow mapRowToEntityRow(Row row, Map<String, Integer> headerMap) {
     return EntitySheetRow.builder()
-        .type(getCellValue(row, headerMap, EntitySheetHeaders.TYPE))
-        .name(getCellValue(row, headerMap, EntitySheetHeaders.NAME))
-        .description(getCellValue(row, headerMap, EntitySheetHeaders.DESCRIPTION))
-        .language(getCellValue(row, headerMap, EntitySheetHeaders.LANGUAGE))
-        .code(getCellValue(row, headerMap, EntitySheetHeaders.CODE))
-        .levelId(getCellValue(row, headerMap, EntitySheetHeaders.LEVEL_ID))
-        .createdBy(getCellValue(row, headerMap, EntitySheetHeaders.CREATED_BY))
-        .updatedBy(getCellValue(row, headerMap, EntitySheetHeaders.UPDATED_BY))
-        .reviewedBy(getCellValue(row, headerMap, EntitySheetHeaders.REVIEWED_BY))
+        .type(getCellValue(row, headerMap, EntitySheetHeadersConstant.TYPE))
+        .name(getCellValue(row, headerMap, EntitySheetHeadersConstant.NAME))
+        .description(getCellValue(row, headerMap, EntitySheetHeadersConstant.DESCRIPTION))
+        .language(getCellValue(row, headerMap, EntitySheetHeadersConstant.LANGUAGE))
+        .code(getCellValue(row, headerMap, EntitySheetHeadersConstant.ENTITY_CODE))
+        .levelId(getCellValue(row, headerMap, EntitySheetHeadersConstant.LEVEL_ID))
+        .createdBy(getCellValue(row, headerMap, EntitySheetHeadersConstant.CREATED_BY))
+        .updatedBy(getCellValue(row, headerMap, EntitySheetHeadersConstant.UPDATED_BY))
+        .reviewedBy(getCellValue(row, headerMap, EntitySheetHeadersConstant.REVIEWED_BY))
         .createdDate(new Date())
-        .updatedDate(getCellValue(row, headerMap, EntitySheetHeaders.UPDATED_DATE))
-        .reviewedDate(getCellValue(row, headerMap, EntitySheetHeaders.REVIEWED_DATE))
+        .updatedDate(getCellValue(row, headerMap, EntitySheetHeadersConstant.UPDATED_DATE))
+        .reviewedDate(getCellValue(row, headerMap, EntitySheetHeadersConstant.REVIEWED_DATE))
         //                .additionalProperties(getCellValue(row, headerMap,
         // EntitySheetHeaders.ADDITIONAL_PROPERTIES))
         .competencyLevel1Name(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_1_NAME))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_1_NAME))
         .competencyLevel1Description(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_1_DESCRIPTION))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_1_DESCRIPTION))
         .competencyLevel2Name(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_2_NAME))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_2_NAME))
         .competencyLevel2Description(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_2_DESCRIPTION))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_2_DESCRIPTION))
         .competencyLevel3Name(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_3_NAME))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_3_NAME))
         .competencyLevel3Description(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_3_DESCRIPTION))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_3_DESCRIPTION))
         .competencyLevel4Name(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_4_NAME))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_4_NAME))
         .competencyLevel4Description(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_4_DESCRIPTION))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_4_DESCRIPTION))
         .competencyLevel5Name(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_5_NAME))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_5_NAME))
         .competencyLevel5Description(
-            getCellValue(row, headerMap, EntitySheetHeaders.COMPETENCY_LEVEL_5_DESCRIPTION))
+            getCellValue(row, headerMap, EntitySheetHeadersConstant.COMPETENCY_LEVEL_5_DESCRIPTION))
         .build();
   }
 

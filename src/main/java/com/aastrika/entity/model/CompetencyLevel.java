@@ -36,9 +36,9 @@ public class CompetencyLevel {
   @Column(name = "level_number")
   private Integer levelNumber;
 
-  @Column(name = "level_name")
+  @Column(name = "level_name", length = 500)
   private String levelName;
 
-  @Column(name = "level_description")
+  @Column(name = "level_description", length = 2000)
   private String levelDescription;
 }

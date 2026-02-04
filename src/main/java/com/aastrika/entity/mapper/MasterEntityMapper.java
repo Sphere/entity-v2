@@ -16,7 +16,21 @@ public interface MasterEntityMapper {
   @Mapping(target = "reviewedBy", ignore = true)
   MasterEntity toEntity(MasterEntityDocument document);
 
-  MasterEntityDocument toDocument(MasterEntity entity);
-
+  @Mapping(source = "language", target = "languageCode")
+  @Mapping(source = "createdDate", target = "createdAt")
+  @Mapping(target = "updatedAt", ignore = true)
+  @Mapping(target = "reviewedAt", ignore = true)
+  @Mapping(target = "source", ignore = true)
+  @Mapping(target = "level", ignore = true)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "competencyLevels", ignore = true)
   MasterEntity toEntity(EntitySheetRow entitySheetRow);
+
+  @Mapping(source = "language", target = "languageCode")
+  @Mapping(source = "createdDate", target = "createdAt")
+  @Mapping(target = "updatedAt", ignore = true)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "level", ignore = true)
+  @Mapping(target = "status", constant = "Active")
+  MasterEntityDocument toDocument(EntitySheetRow entitySheetRow);
 }
