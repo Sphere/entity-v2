@@ -24,7 +24,7 @@ node() {
         stage('docker-pre-build') {
             sh '''
 	    docker build -f ./Dockerfile.build -t $docker_pre_build .
-	    docker run --name $docker_pre_build $docker_pre_build:latest && docker cp $docker_pre_build:/opt/sunbird-entity/target/entity-0.0.1-SNAPSHOT.jar .
+	    docker run --name $docker_pre_build $docker_pre_build:latest && docker cp $docker_pre_build:/opt/target/entity-0.0.1-SNAPSHOT.jar .
 	    sleep 30
 	    docker rm -f $docker_pre_build
 	    docker rmi -f $docker_pre_build
