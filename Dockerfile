@@ -10,6 +10,5 @@ RUN apt-get update \
         xfonts-base \
         xz-utils
 
-COPY sunbird-entity/src/main/resources/keys /opt/keys
 COPY entity-0.0.1-SNAPSHOT.jar /opt/
 CMD ["java", "-XX:+PrintFlagsFinal", "-XX:+UnlockExperimentalVMOptions", "-jar", "/opt/entity-0.0.1-SNAPSHOT.jar"]
