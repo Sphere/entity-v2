@@ -11,4 +11,4 @@ RUN apt-get update \
         xz-utils
 
 COPY entity-0.0.1-SNAPSHOT.jar /opt/
-CMD ["java", "-XX:+PrintFlagsFinal", "-XX:+UnlockExperimentalVMOptions", "-jar", "/opt/entity-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-XX:+PrintFlagsFinal", "-XX:+UnlockExperimentalVMOptions", "-jar", "/opt/entity-0.0.1-SNAPSHOT.jar","--spring.config.location=/opt/application.properties"]
