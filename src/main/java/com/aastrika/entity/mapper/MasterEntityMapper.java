@@ -2,6 +2,9 @@ package com.aastrika.entity.mapper;
 
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.EntitySheetRow;
+import com.aastrika.entity.dto.response.CompetencyLevelResponseDTO;
+import com.aastrika.entity.dto.response.EntityResponseDTO;
+import com.aastrika.entity.model.CompetencyLevel;
 import com.aastrika.entity.model.MasterEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -33,4 +36,8 @@ public interface MasterEntityMapper {
   @Mapping(target = "level", ignore = true)
   @Mapping(target = "status", constant = "Active")
   MasterEntityDocument toDocument(EntitySheetRow entitySheetRow);
+
+  EntityResponseDTO toResponseDTO(MasterEntity entity);
+
+  CompetencyLevelResponseDTO toResponseDTO(CompetencyLevel level);
 }

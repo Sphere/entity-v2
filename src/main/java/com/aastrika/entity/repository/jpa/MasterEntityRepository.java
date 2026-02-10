@@ -17,6 +17,8 @@ public interface MasterEntityRepository extends JpaRepository<MasterEntity, Inte
 
   List<MasterEntity> findByCode(String code);
 
+  MasterEntity findByCodeAndLanguageCode(String code, String languageCode);
+
   List<MasterEntity> findByStatus(String status);
 
   List<MasterEntity> findByTypeAndStatus(String type, String status);

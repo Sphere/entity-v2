@@ -21,16 +21,16 @@ public class MasterEntityDocument {
 
   @Id private String id;
 
-  @Field(type = FieldType.Text)
+  @Field(type = FieldType.Keyword)
   private String entityId;
 
-  @Field(type = FieldType.Keyword)
+  @Field(type = FieldType.Text)
   private String entityType;
 
   @Field(type = FieldType.Keyword)
   private String type;
 
-  @Field(type = FieldType.Keyword)
+  @Field(type = FieldType.Text)
   private String code;
 
   @Field(type = FieldType.Text, analyzer = "standard")

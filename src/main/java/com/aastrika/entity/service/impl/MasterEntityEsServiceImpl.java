@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.EntitySheetRow;
+import com.aastrika.entity.dto.request.SearchDTO;
 import com.aastrika.entity.mapper.MasterEntityMapper;
 import com.aastrika.entity.repository.es.ElasticSearchEntityRepository;
 import com.aastrika.entity.service.MasterEntityEsService;
@@ -34,12 +35,107 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
   public void saveEntityDetailsInES(@NonNull List<EntitySheetRow> entitySheetRowList, String entityType) {
 
     List<MasterEntityDocument> documents = entitySheetRowList.stream()
-      .map(masterEntityMapper::toDocument)
+      .map(row -> {
+        MasterEntityDocument doc = masterEntityMapper.toDocument(row);
+        // Set consistent ID: code_languageCode
+        doc.setId(row.getCode() + "_" + row.getLanguage());
+        return doc;
+      })
       .toList();
 
     elasticSearchEntityRepository.saveAll(documents);
 
     log.info("Successfully saved {} documents to Elasticsearch", documents.size());
+  }
+
+  /**
+   * Search by exact code match
+   * Uses term query for exact matching on keyword field
+   * <p>
+   * Final ES JSON:
+   * { "query": { "term": { "code": "YOUR_VALUE" } } }
+   *
+   */
+  @Override
+  public List<MasterEntityDocument> searchByCode(String code) {
+    TermQuery termQuery = new TermQuery.Builder()
+      .field("code")
+      .value(code)
+      .build();
+
+    NativeQuery query = NativeQuery.builder()
+      .withQuery(queryBuilder -> queryBuilder.term(termQuery))
+      .build();
+
+    return executeSearch(query);
+  }
+
+
+  /**
+   * Dynamic search based on SearchDTO parameters.
+   * - Always filters by entityType and languageCode (exact match)
+   * - strict=true  → fuzzy search (typo tolerant) on specified fields
+   * - strict=false → exact phrase match on specified fields
+   *
+   * Example ES JSON (strict=true):
+   * {
+   *   "query": {
+   *     "bool": {
+   *       "must": [
+   *         { "term": { "entityType": "competency" } },
+   *         { "term": { "languageCode": "en" } }
+   *       ],
+   *       "should": [
+   *         { "match": { "code": { "query": "c1", "fuzziness": "AUTO" } } },
+   *         { "match": { "name": { "query": "c1", "fuzziness": "AUTO" } } }
+   *       ],
+   *       "minimum_should_match": 1
+   *     }
+   *   }
+   * }
+   */
+  public List<MasterEntityDocument> findEntitiesBySearchParameter(SearchDTO searchDTO) {
+    // Must: exact match on entityType and languageCode
+    Query entityTypeFilter = new Query.Builder()
+      .match(entityTypeTermQueryBuilder ->
+        entityTypeTermQueryBuilder.field("entityType").query(searchDTO.getEntityType()).fuzziness("AUTO"))
+      .build();
+
+    Query languageFilter = new Query.Builder()
+        .term(languageTermQueryBuilder ->
+          languageTermQueryBuilder.field("languageCode").value(searchDTO.getLanguage()).caseInsensitive(true))
+        .build();
+
+    // Should: fuzzy or exact match on each field
+    List<Query> fieldQueries = searchDTO.getField().stream()
+        .map(field -> buildFieldQuery(field, searchDTO.getQuery(), searchDTO.isStrict()))
+        .toList();
+
+    BoolQuery boolQuery = new BoolQuery.Builder()
+        .must(entityTypeFilter, languageFilter)
+        .should(fieldQueries)
+        .minimumShouldMatch("1")
+        .build();
+
+    NativeQuery query = NativeQuery.builder()
+        .withQuery(queryBuilder -> queryBuilder.bool(boolQuery))
+        .build();
+
+    return executeSearch(query);
+  }
+
+  private Query buildFieldQuery(String field, String queryText, boolean strict) {
+    if (!strict) {
+      // Fuzzy: handles typos
+      return new Query.Builder()
+          .match(fieldMatchQueryBuilder -> fieldMatchQueryBuilder.field(field).query(queryText).fuzziness("AUTO"))
+          .build();
+    } else {
+      // Exact phrase match
+      return new Query.Builder()
+          .matchPhrase(fieldMatchPhraseQueryBuilder -> fieldMatchPhraseQueryBuilder.field(field).query(queryText))
+          .build();
+    }
   }
 
   /**
@@ -157,27 +253,7 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
     return executeSearch(query);
   }
 
-  /**
-   * Search by exact code match
-   * Uses term query for exact matching on keyword field
-   * <p>
-   * Final ES JSON:
-   * { "query": { "term": { "code": "YOUR_VALUE" } } }
-   *
-   */
-  @Override
-  public List<MasterEntityDocument> searchByCode(String code) {
-    TermQuery termQuery = new TermQuery.Builder()
-      .field("code")
-      .value(code)
-      .build();
 
-    NativeQuery query = NativeQuery.builder()
-      .withQuery(queryBuilder -> queryBuilder.term(termQuery))
-      .build();
-
-    return executeSearch(query);
-  }
 
   /**
    *
