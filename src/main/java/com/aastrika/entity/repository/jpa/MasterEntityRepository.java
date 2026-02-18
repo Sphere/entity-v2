@@ -3,6 +3,7 @@ package com.aastrika.entity.repository.jpa;
 import com.aastrika.entity.model.MasterEntity;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.aastrika.entity.util.CodeLanguageProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +18,7 @@ public interface MasterEntityRepository extends JpaRepository<MasterEntity, Inte
 
   List<MasterEntity> findByCode(String code);
 
-  MasterEntity findByCodeAndLanguageCode(String code, String languageCode);
+  Optional<MasterEntity> findByCodeAndLanguageCode(String code, String languageCode);
 
   List<MasterEntity> findByStatus(String status);
 
@@ -33,4 +34,6 @@ public interface MasterEntityRepository extends JpaRepository<MasterEntity, Inte
 
   @Query("SELECT m.code as code, m.languageCode as languageCode FROM MasterEntity m WHERE CONCAT(m.code, ':', m.languageCode) IN :pairs")
   List<CodeLanguageProjection> findByCodeLanguagePairs(@Param("pairs") List<String> pairs);
+
+  List<MasterEntity> findByCodeInAndLanguageCode(List<String> entityCodes, String languageCode);
 }

@@ -95,11 +95,18 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
    * }
    */
   public List<MasterEntityDocument> findEntitiesBySearchParameter(SearchDTO searchDTO) {
-    // Must: exact match on entityType and languageCode
+    // Must: exact match on entityType
     Query entityTypeFilter = new Query.Builder()
       .match(entityTypeTermQueryBuilder ->
         entityTypeTermQueryBuilder.field("entityType").query(searchDTO.getEntityType()).fuzziness("AUTO"))
       .build();
+
+    if (searchDTO.getQuery() == null || searchDTO.getQuery().isBlank()) {
+      NativeQuery matchAllQuery = NativeQuery.builder()
+          .withQuery(queryBuilder -> queryBuilder.bool(b -> b.must(entityTypeFilter)))
+          .build();
+      return executeSearch(matchAllQuery);
+    }
 
     Query languageFilter = new Query.Builder()
         .term(languageTermQueryBuilder ->

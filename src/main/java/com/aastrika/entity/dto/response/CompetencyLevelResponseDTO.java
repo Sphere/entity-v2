@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CompetencyLevelResponseDTO {
 
-  private Integer id;
+//  private Integer id;
   private Integer levelNumber;
   private String levelName;
   private String levelDescription;

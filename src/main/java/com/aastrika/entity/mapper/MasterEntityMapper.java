@@ -2,6 +2,8 @@ package com.aastrika.entity.mapper;
 
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.EntitySheetRow;
+import com.aastrika.entity.dto.request.CompetencyLevelDTO;
+import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
 import com.aastrika.entity.dto.response.CompetencyLevelResponseDTO;
 import com.aastrika.entity.dto.response.EntityResponseDTO;
 import com.aastrika.entity.model.CompetencyLevel;
@@ -40,4 +42,8 @@ public interface MasterEntityMapper {
   EntityResponseDTO toResponseDTO(MasterEntity entity);
 
   CompetencyLevelResponseDTO toResponseDTO(CompetencyLevel level);
+
+  CompetencyLevel toCompetencyLevel(CompetencyLevelDTO competencyLevelDTO);
+
+  MasterEntity toEntity(EntityCreateRequestDTO entityCreateRequestDTO);
 }

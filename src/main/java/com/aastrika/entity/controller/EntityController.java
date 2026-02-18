@@ -1,9 +1,10 @@
 package com.aastrika.entity.controller;
 
 import com.aastrika.entity.document.MasterEntityDocument;
+import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
 import com.aastrika.entity.dto.request.EntityUpdateDTO;
 import com.aastrika.entity.dto.request.SearchDTO;
-import com.aastrika.entity.dto.response.ApiResponse;
+import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.dto.response.EntityResponseDTO;
 import com.aastrika.entity.model.MasterEntity;
 import com.aastrika.entity.service.MasterEntityEsService;
@@ -12,9 +13,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,67 +39,68 @@ public class EntityController {
       summary = "Upload entity sheet",
       description = "Upload CSV or XLSX file containing entity data (Competencies, Roles, etc.)")
   @ApiResponses(value = {
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      @ApiResponse(
           responseCode = "201",
           description = "Entities uploaded successfully",
-          content = @Content(schema = @Schema(implementation = ApiResponse.class))),
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+          content = @Content(schema = @Schema(implementation = AppResponse.class))),
+      @ApiResponse(
           responseCode = "400",
           description = "Invalid file or duplicate entries")
   })
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ApiResponse> uploadEntitySheet(
+  public ResponseEntity<AppResponse> uploadEntitySheet(
       @Parameter(description = "Language code (e.g., en, hi)") @RequestParam("language") String language,
       @Parameter(description = "User ID performing the upload") @RequestParam("userId") String userId,
       @Parameter(description = "CSV or XLSX file") @RequestParam("entitySheet") MultipartFile entitySheet) {
 
-    ApiResponse apiResponse = masterEntityService.processAndUploadSheet(entitySheet, userId);
-    return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+    AppResponse appResponse = masterEntityService.processAndUploadSheet(entitySheet, userId);
+    return ResponseEntity.status(HttpStatus.CREATED).body(appResponse);
   }
 
   @Operation(
       summary = "Create a new entity",
       description = "Create a new master entity with all details")
   @ApiResponses(value = {
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      @ApiResponse(
           responseCode = "201",
           description = "Entity created successfully",
           content = @Content(schema = @Schema(implementation = MasterEntity.class))),
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      @ApiResponse(
           responseCode = "400",
           description = "Invalid entity data")
   })
-  @PostMapping
-  public ResponseEntity<MasterEntity> create(@RequestBody MasterEntity entity) {
-    MasterEntity created = masterEntityService.create(entity);
-    return ResponseEntity.status(HttpStatus.CREATED).body(created);
+  @PostMapping("/create")
+  public ResponseEntity<AppResponse> create(@RequestParam("userId") String userId,
+                                            @RequestBody EntityCreateRequestDTO entityCreateRequestDTO) {
+    AppResponse appResponse = masterEntityService.create(entityCreateRequestDTO, userId);
+    return ResponseEntity.status(HttpStatus.CREATED).body(appResponse);
   }
 
   @Operation(
       summary = "Update an existing entity",
       description = "Update entity by code + languageCode. Only non-null fields will be updated.")
   @ApiResponses(value = {
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      @ApiResponse(
           responseCode = "200",
           description = "Entity updated successfully",
           content = @Content(schema = @Schema(implementation = EntityResponseDTO.class))),
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      @ApiResponse(
           responseCode = "400",
           description = "Entity not found or invalid data")
   })
   @PutMapping("/update")
-  public ResponseEntity<ApiResponse> update(
-      @RequestBody EntityUpdateDTO updateDTO,
+  public ResponseEntity<AppResponse> update(
+      @Valid @RequestBody EntityUpdateDTO updateDTO,
       @Parameter(description = "User ID performing the update") @RequestParam("userId") String userId) {
-    ApiResponse apiResponse = masterEntityService.update(updateDTO, userId);
-    return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+    AppResponse appResponse = masterEntityService.update(updateDTO, userId);
+    return ResponseEntity.status(HttpStatus.CREATED).body(appResponse);
   }
 
   @Operation(
       summary = "Fuzzy search by name",
       description = "Search entities by name with typo tolerance. Handles misspellings and partial matches.")
   @ApiResponses(value = {
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      @ApiResponse(
           responseCode = "200",
           description = "Search results returned",
           content = @Content(schema = @Schema(implementation = MasterEntityDocument.class)))
@@ -111,7 +116,7 @@ public class EntityController {
       summary = "Search entities by parameters",
       description = "Dynamic search with filters on entityType, language, and custom fields. Supports both fuzzy and exact matching.")
   @ApiResponses(value = {
-      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      @ApiResponse(
           responseCode = "200",
           description = "Search results returned",
           content = @Content(schema = @Schema(implementation = MasterEntityDocument.class)))

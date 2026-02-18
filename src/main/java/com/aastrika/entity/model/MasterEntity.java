@@ -56,7 +56,7 @@ public class MasterEntity {
   @Column(length = 50)
   private String status;
 
-  @Column(length = 50)
+  @Column(length = 50, nullable = false)
   private String code;
 
   @Column(length = 10, name = "language_code")

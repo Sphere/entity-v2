@@ -1,17 +1,17 @@
 package com.aastrika.entity.dto.request;
 
-import java.util.List;
-import java.util.Map;
-
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EntityUpdateDTO {
+public class EntityCreateRequestDTO {
 
   // Identifier (required to find the entity)
   @NotBlank(message = "Entity code must not be blank")

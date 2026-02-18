@@ -5,8 +5,9 @@ import com.aastrika.entity.common.EntitySheetHeadersConstant;
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.EntitySheetRow;
 import com.aastrika.entity.dto.request.CompetencyLevelDTO;
+import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
 import com.aastrika.entity.dto.request.EntityUpdateDTO;
-import com.aastrika.entity.dto.response.ApiResponse;
+import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.dto.response.EntityResponseDTO;
 import com.aastrika.entity.exception.UpdateEntityException;
 import com.aastrika.entity.exception.UploadEntityException;
@@ -34,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.StringUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,7 +58,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
    * @param sheetFile
    * @return
    */
-  public ApiResponse processAndUploadSheet(MultipartFile sheetFile, String userId) {
+  public AppResponse processAndUploadSheet(MultipartFile sheetFile, String userId) {
     EntitySheetReader entitySheetReader = entitySheetReaderFactory.getSheetReader(sheetFile);
 
     Map<String, List<EntitySheetRow>> entitySheetMap = entitySheetReader.getCompiledEntitySheet(sheetFile);
@@ -68,20 +70,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     EntityUploadTracker entityUploadTracker = saveSheetDataIntoDB(entitySheetMap,
       entitySheetReader.getGlobalEntityType(), userId);
 
-    ApiResponse apiResponse = new ApiResponse();
-    apiResponse.setResponseCode(HttpStatus.OK.name());
-    apiResponse.setResult(entityUploadTracker);
-    apiResponse.setTs(OffsetDateTime.now(ZoneId.of("Asia/Kolkata")));
-    apiResponse.setVer("v1");
-    apiResponse.setResponseCode(HttpStatus.OK.name());
-
-    ApiResponse.Params params = new ApiResponse.Params();
-    params.setStatus("success");
-
-    apiResponse.setParams(params);
-
-    return apiResponse;
-
+    return AppResponse.success("api.entity.upload", entityUploadTracker, HttpStatus.OK);
   }
 
   /**
@@ -142,39 +131,48 @@ public class MasterEntityServiceImpl implements MasterEntityService {
 
 
   @Override
-  public MasterEntity create(MasterEntity entity) {
-    entity.setCreatedAt(new Date());
-    MasterEntity saved = masterEntityRepository.save(entity);
-    indexToElasticsearch(saved);
-    return saved;
+  public AppResponse create(EntityCreateRequestDTO entityCreateRequestDTO, String userId) {
+    if (StringUtil.isBlank(userId)) {
+      throw new UpdateEntityException(HttpStatus.BAD_REQUEST, "Unable to find user id details");
+    }
+
+    Optional<MasterEntity> masterEntityOptional =
+      masterEntityRepository.findByCodeAndLanguageCode(entityCreateRequestDTO.getCode(),
+        entityCreateRequestDTO.getLanguageCode());
+
+    masterEntityOptional.ifPresent(entity -> {
+      throw new UpdateEntityException(HttpStatus.CONFLICT,
+        "Entity already exists with code: " + entityCreateRequestDTO.getCode()
+          + " and language: " + entityCreateRequestDTO.getLanguageCode());
+    });
+
+    MasterEntity masterEntity = masterEntityMapper.toEntity(entityCreateRequestDTO);
+    masterEntity.setCreatedAt(new Date());
+    masterEntity.setCreatedBy(userId);
+
+    if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(entityCreateRequestDTO.getEntityType())) {
+      populateCompetencyInMasterEntity(masterEntity, entityCreateRequestDTO);
+    }
+
+    masterEntityRepository.save(masterEntity);
+    upsertToElasticsearch(masterEntity);
+
+    return AppResponse.success("api.entity.create", null, HttpStatus.OK);
   }
 
-  @Override
-  public MasterEntity update(Integer id, MasterEntity entity) {
-    MasterEntity existing =
-        masterEntityRepository
-            .findById(id)
-            .orElseThrow(() -> new RuntimeException("Entity not found with id: " + id));
+  private void populateCompetencyInMasterEntity(@NonNull MasterEntity masterEntity,
+                                                @NonNull EntityCreateRequestDTO entityCreateRequestDTO) {
+    if (entityCreateRequestDTO.getCompetencyLevels() != null && !entityCreateRequestDTO.getCompetencyLevels().isEmpty()) {
+      List<CompetencyLevel> competencyLevelList = new ArrayList<>();
 
-    existing.setType(entity.getType());
-    existing.setName(entity.getName());
-    existing.setDescription(entity.getDescription());
-    existing.setAdditionalProperties(entity.getAdditionalProperties());
-    existing.setStatus(entity.getStatus());
-    existing.setSource(entity.getSource());
-    existing.setLevel(entity.getLevel());
-    existing.setLevelId(entity.getLevelId());
-    existing.setLanguageCode(entity.getLanguageCode());
-    existing.setUpdatedAt(new Date());
-    existing.setUpdatedBy(entity.getUpdatedBy());
-    existing.setReviewedAt(entity.getReviewedAt());
-    existing.setReviewedBy(entity.getReviewedBy());
-
-    MasterEntity updated = masterEntityRepository.save(existing);
-    indexToElasticsearch(updated);
-    return updated;
+      for (CompetencyLevelDTO competencyLevelDTO : entityCreateRequestDTO.getCompetencyLevels()) {
+        CompetencyLevel competencyLevel = masterEntityMapper.toCompetencyLevel(competencyLevelDTO);
+        competencyLevel.setMasterEntity(masterEntity);
+        competencyLevelList.add(competencyLevel);
+      }
+      masterEntity.setCompetencyLevels(competencyLevelList);
+    }
   }
-
 
   /**
    * @param updateDTO
@@ -182,21 +180,16 @@ public class MasterEntityServiceImpl implements MasterEntityService {
    * @return
    */
   @Override
-  public ApiResponse update(EntityUpdateDTO updateDTO, String userId) {
-    MasterEntity existingMasterEntity = masterEntityRepository
+  public AppResponse update(EntityUpdateDTO updateDTO, String userId) {
+    Optional<MasterEntity> existingMasterEntityOptional = masterEntityRepository
         .findByCodeAndLanguageCode(updateDTO.getCode(), updateDTO.getLanguageCode());
 
-    if (StringUtil.isBlank(updateDTO.getCode()) || StringUtil.isBlank(updateDTO.getLanguageCode())) {
-      throw new UpdateEntityException(HttpStatus.BAD_REQUEST, "Entity code or Language code is missing");
-    }
+    MasterEntity existingMasterEntity = existingMasterEntityOptional.orElseThrow(() ->
+      new UpdateEntityException(HttpStatus.NOT_FOUND, "Entity code " + updateDTO.getCode() +
+        " with language " + updateDTO.getLanguageCode() + " not found for update"));
 
     if (StringUtil.isBlank(userId)) {
       throw new UpdateEntityException(HttpStatus.BAD_REQUEST, "Unable to find user id details");
-    }
-
-    if (existingMasterEntity == null) {
-      throw new UpdateEntityException(HttpStatus.BAD_REQUEST,
-          "Entity not found with code: " + updateDTO.getCode() + " and languageCode: " + updateDTO.getLanguageCode());
     }
 
     // Update basic fields (only if provided in DTO)
@@ -243,26 +236,13 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     existingMasterEntity.setUpdatedBy(userId);
 
     MasterEntity updatedMasterEntity = masterEntityRepository.save(existingMasterEntity);
-    indexToElasticsearch(updatedMasterEntity);
+    upsertToElasticsearch(updatedMasterEntity);
     return getUpdatedWrappedResponse(updatedMasterEntity);
   }
 
-  private ApiResponse getUpdatedWrappedResponse(MasterEntity updatedMasterEntity) {
+  private AppResponse getUpdatedWrappedResponse(MasterEntity updatedMasterEntity) {
     EntityResponseDTO entityResponseDTO = masterEntityMapper.toResponseDTO(updatedMasterEntity);
-
-    ApiResponse apiResponse = new ApiResponse();
-    apiResponse.setResponseCode(HttpStatus.OK.name());
-    apiResponse.setResult(entityResponseDTO);
-    apiResponse.setTs(OffsetDateTime.now(ZoneId.of("Asia/Kolkata")));
-    apiResponse.setVer("v1");
-    apiResponse.setResponseCode(HttpStatus.OK.name());
-
-    ApiResponse.Params params = new ApiResponse.Params();
-    params.setStatus("success");
-
-    apiResponse.setParams(params);
-
-    return apiResponse;
+    return AppResponse.success("api.entity.update", entityResponseDTO, HttpStatus.OK);
   }
 
   /**
@@ -316,7 +296,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     elasticSearchEntityRepository.deleteById(String.valueOf(id));
   }
 
-  private void indexToElasticsearch(MasterEntity entity) {
+  private void upsertToElasticsearch(MasterEntity entity) {
     // Use code + languageCode as unique ES document ID
     String esDocId = entity.getCode() + "_" + entity.getLanguageCode();
 
