@@ -92,7 +92,7 @@ class MasterEntityServiceImplTest {
     // Assert
     assertAll(
         () -> assertNotNull(result),
-        () -> assertEquals(HttpStatus.OK.toString(), result.getResponseCode())
+        () -> assertEquals(HttpStatus.OK.getReasonPhrase(), result.getResponseCode())
     );
 
     // Verify createdAt and createdBy were set

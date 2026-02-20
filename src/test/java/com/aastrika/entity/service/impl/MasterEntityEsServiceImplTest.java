@@ -12,6 +12,9 @@ import static org.mockito.Mockito.when;
 
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.request.SearchDTO;
+import com.aastrika.entity.dto.response.AppResponse;
+import com.aastrika.entity.dto.response.EntityResult;
+import com.aastrika.entity.dto.response.MasterEntitySearchResponseDTO;
 import com.aastrika.entity.mapper.MasterEntityMapper;
 import com.aastrika.entity.repository.es.ElasticSearchEntityRepository;
 import java.util.List;
@@ -68,21 +71,27 @@ class MasterEntityEsServiceImplTest {
         .status("Active")
         .build();
 
+    MasterEntitySearchResponseDTO responseDTO = MasterEntitySearchResponseDTO.builder()
+        .name("Problem Solving").code("PS001").languageCode("en").build();
+
     when(searchHit.getContent()).thenReturn(expectedDoc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
     when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
+    when(masterEntityMapper.toSearchResponse(expectedDoc)).thenReturn(responseDTO);
 
     // Act
-    List<MasterEntityDocument> results = masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
+    AppResponse<EntityResult<MasterEntitySearchResponseDTO>> response =
+        masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
 
     // Assert
+    EntityResult<MasterEntitySearchResponseDTO> result = response.getResult();
     assertAll(
-        () -> assertNotNull(results, "Results should not be null"),
-        () -> assertEquals(1, results.size(), "Should return 1 document"),
-        () -> assertEquals("Problem Solving", results.get(0).getName()),
-        () -> assertEquals("PS001", results.get(0).getCode()),
-        () -> assertEquals("en", results.get(0).getLanguageCode())
+        () -> assertNotNull(result, "Result should not be null"),
+        () -> assertEquals(1, result.getCount(), "Count should be 1"),
+        () -> assertEquals("Problem Solving", result.getEntity().get(0).getName()),
+        () -> assertEquals("PS001", result.getEntity().get(0).getCode()),
+        () -> assertEquals("en", result.getEntity().get(0).getLanguageCode())
     );
 
     verify(elasticsearchOperations, times(1))
@@ -110,20 +119,26 @@ class MasterEntityEsServiceImplTest {
         .status("Active")
         .build();
 
+    MasterEntitySearchResponseDTO responseDTO = MasterEntitySearchResponseDTO.builder()
+        .name("Communication Skills").code("CS001").build();
+
     when(searchHit.getContent()).thenReturn(expectedDoc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
     when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
+    when(masterEntityMapper.toSearchResponse(expectedDoc)).thenReturn(responseDTO);
 
     // Act
-    List<MasterEntityDocument> results = masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
+    AppResponse<EntityResult<MasterEntitySearchResponseDTO>> response =
+        masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
 
     // Assert
+    EntityResult<MasterEntitySearchResponseDTO> result = response.getResult();
     assertAll(
-        () -> assertNotNull(results),
-        () -> assertEquals(1, results.size()),
-        () -> assertEquals("Communication Skills", results.get(0).getName()),
-        () -> assertEquals("CS001", results.get(0).getCode())
+        () -> assertNotNull(result),
+        () -> assertEquals(1, result.getCount()),
+        () -> assertEquals("Communication Skills", result.getEntity().get(0).getName()),
+        () -> assertEquals("CS001", result.getEntity().get(0).getCode())
     );
 
     verify(elasticsearchOperations, times(1))
@@ -146,12 +161,15 @@ class MasterEntityEsServiceImplTest {
         .thenReturn(searchHits);
 
     // Act
-    List<MasterEntityDocument> results = masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
+    AppResponse<EntityResult<MasterEntitySearchResponseDTO>> response =
+        masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
 
     // Assert
+    EntityResult<MasterEntitySearchResponseDTO> result = response.getResult();
     assertAll(
-        () -> assertNotNull(results, "Results should not be null even when empty"),
-        () -> assertTrue(results.isEmpty(), "Should return empty list")
+        () -> assertNotNull(result, "Result should not be null even when empty"),
+        () -> assertEquals(0, result.getCount(), "Count should be 0"),
+        () -> assertTrue(result.getEntity().isEmpty(), "Entity list should be empty")
     );
 
     verify(elasticsearchOperations, times(1))
