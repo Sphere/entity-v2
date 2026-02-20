@@ -30,6 +30,7 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
   private final ElasticSearchEntityRepository elasticSearchEntityRepository;
   private final MasterEntityMapper masterEntityMapper;
   private final ElasticsearchOperations elasticsearchOperations;
+  private static final int DEFAULT_PAGE_SIZE = 500;
 
   @Override
   public void saveEntityDetailsInES(@NonNull List<EntitySheetRow> entitySheetRowList, String entityType) {
@@ -294,6 +295,8 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
    * Common method to execute search and extract results
    */
   private List<MasterEntityDocument> executeSearch(NativeQuery query) {
+    query.setMaxResults(DEFAULT_PAGE_SIZE);
+
     SearchHits<MasterEntityDocument> searchHits =
       elasticsearchOperations.search(query, MasterEntityDocument.class);
 
