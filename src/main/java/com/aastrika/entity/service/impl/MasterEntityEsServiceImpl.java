@@ -9,16 +9,23 @@ import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.EntitySheetRow;
 import com.aastrika.entity.dto.request.SearchDTO;
+import com.aastrika.entity.dto.response.AppResponse;
+import com.aastrika.entity.dto.response.EntityResult;
+import com.aastrika.entity.dto.response.MasterEntitySearchResponseDTO;
 import com.aastrika.entity.mapper.MasterEntityMapper;
 import com.aastrika.entity.repository.es.ElasticSearchEntityRepository;
 import com.aastrika.entity.service.MasterEntityEsService;
+
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.util.StringUtil;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -95,41 +102,60 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
    *   }
    * }
    */
-  public List<MasterEntityDocument> findEntitiesBySearchParameter(SearchDTO searchDTO) {
+  public AppResponse<EntityResult<MasterEntitySearchResponseDTO>> findEntitiesBySearchParameter(SearchDTO searchDTO) {
     // Must: exact match on entityType
     Query entityTypeFilter = new Query.Builder()
       .match(entityTypeTermQueryBuilder ->
         entityTypeTermQueryBuilder.field("entityType").query(searchDTO.getEntityType()).fuzziness("AUTO"))
       .build();
 
-    if (searchDTO.getQuery() == null || searchDTO.getQuery().isBlank()) {
-      NativeQuery matchAllQuery = NativeQuery.builder()
-          .withQuery(queryBuilder -> queryBuilder.bool(b -> b.must(entityTypeFilter)))
-          .build();
-      return executeSearch(matchAllQuery);
-    }
+    boolean hasLanguage = !searchDTO.getLanguage().isBlank();
 
-    Query languageFilter = new Query.Builder()
-        .term(languageTermQueryBuilder ->
-          languageTermQueryBuilder.field("languageCode").value(searchDTO.getLanguage()).caseInsensitive(true))
-        .build();
+    Query languageFilter = hasLanguage
+      ? new Query.Builder()
+          .term(t -> t.field("languageCode").value(searchDTO.getLanguage()).caseInsensitive(true))
+          .build()
+      : null;
+
+    if (searchDTO.getQuery() == null || searchDTO.getQuery().isBlank()) {
+      BoolQuery.Builder boolBlankBuilder = new BoolQuery.Builder().must(entityTypeFilter);
+      if (hasLanguage) boolBlankBuilder.must(languageFilter);
+
+      NativeQuery matchAllQuery = NativeQuery.builder()
+          .withQuery(queryBuilder -> queryBuilder.bool(boolBlankBuilder.build()))
+          .build();
+      return wrapInApiResponse(executeSearch(matchAllQuery));
+    }
 
     // Should: fuzzy or exact match on each field
     List<Query> fieldQueries = searchDTO.getField().stream()
         .map(field -> buildFieldQuery(field, searchDTO.getQuery(), searchDTO.isStrict()))
         .toList();
 
-    BoolQuery boolQuery = new BoolQuery.Builder()
-        .must(entityTypeFilter, languageFilter)
+    BoolQuery.Builder mainBoolBuilder = new BoolQuery.Builder()
+        .must(entityTypeFilter)
         .should(fieldQueries)
-        .minimumShouldMatch("1")
-        .build();
+        .minimumShouldMatch("1");
+    if (hasLanguage) mainBoolBuilder.must(languageFilter);
+
+    BoolQuery boolQuery = mainBoolBuilder.build();
 
     NativeQuery query = NativeQuery.builder()
         .withQuery(queryBuilder -> queryBuilder.bool(boolQuery))
         .build();
 
-    return executeSearch(query);
+    return wrapInApiResponse(executeSearch(query));
+  }
+
+  /**
+   * @param masterEntityDocumentList
+   * @return
+   */
+  private AppResponse<EntityResult<MasterEntitySearchResponseDTO>> wrapInApiResponse(List<MasterEntityDocument> masterEntityDocumentList) {
+    List<MasterEntitySearchResponseDTO> masterEntitySearchResponseDTOList = masterEntityDocumentList != null
+        ? masterEntityDocumentList.stream().map(masterEntityMapper::toSearchResponse).toList()
+        : List.of();
+    return AppResponse.success("api.entity.search", EntityResult.of(masterEntitySearchResponseDTOList), HttpStatus.OK);
   }
 
   private Query buildFieldQuery(String field, String queryText, boolean strict) {

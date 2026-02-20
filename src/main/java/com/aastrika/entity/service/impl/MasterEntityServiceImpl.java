@@ -9,6 +9,7 @@ import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
 import com.aastrika.entity.dto.request.EntityUpdateDTO;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.dto.response.EntityResponseDTO;
+import com.aastrika.entity.dto.response.EntityResult;
 import com.aastrika.entity.exception.UpdateEntityException;
 import com.aastrika.entity.exception.UploadEntityException;
 import com.aastrika.entity.mapper.MasterEntityMapper;
@@ -70,7 +71,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     EntityUploadTracker entityUploadTracker = saveSheetDataIntoDB(entitySheetMap,
       entitySheetReader.getGlobalEntityType(), userId);
 
-    return AppResponse.success("api.entity.upload", entityUploadTracker, HttpStatus.OK);
+    return AppResponse.success("api.entity.upload", EntityResult.of(entityUploadTracker), HttpStatus.OK);
   }
 
   /**
@@ -157,7 +158,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     masterEntityRepository.save(masterEntity);
     upsertToElasticsearch(masterEntity);
 
-    return AppResponse.success("api.entity.create", null, HttpStatus.OK);
+    return AppResponse.success("api.entity.create", EntityResult.empty(), HttpStatus.OK);
   }
 
   private void populateCompetencyInMasterEntity(@NonNull MasterEntity masterEntity,
@@ -242,7 +243,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
 
   private AppResponse getUpdatedWrappedResponse(MasterEntity updatedMasterEntity) {
     EntityResponseDTO entityResponseDTO = masterEntityMapper.toResponseDTO(updatedMasterEntity);
-    return AppResponse.success("api.entity.update", entityResponseDTO, HttpStatus.OK);
+    return AppResponse.success("api.entity.update", EntityResult.of(entityResponseDTO), HttpStatus.OK);
   }
 
   /**

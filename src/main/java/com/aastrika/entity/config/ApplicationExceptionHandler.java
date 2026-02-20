@@ -3,6 +3,7 @@ package com.aastrika.entity.config;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.exception.ApiRuntimeException;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class ApplicationExceptionHandler {
 
   @ExceptionHandler(ApiRuntimeException.class)
@@ -48,5 +50,12 @@ public class ApplicationExceptionHandler {
   public ResponseEntity<AppResponse> handleIllegalArgument(IllegalArgumentException exception) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(AppResponse.error(null, exception.getMessage(), HttpStatus.BAD_REQUEST));
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<AppResponse> handleGenericException(Exception exception) {
+    log.error("Unexpected error occurred: {}", exception.getMessage(), exception);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(AppResponse.error("api.entity.error", exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
   }
 }

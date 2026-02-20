@@ -6,6 +6,8 @@ import com.aastrika.entity.dto.request.EntityUpdateDTO;
 import com.aastrika.entity.dto.request.SearchDTO;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.dto.response.EntityResponseDTO;
+import com.aastrika.entity.dto.response.EntityResult;
+import com.aastrika.entity.dto.response.MasterEntitySearchResponseDTO;
 import com.aastrika.entity.model.MasterEntity;
 import com.aastrika.entity.service.MasterEntityEsService;
 import com.aastrika.entity.service.MasterEntityService;
@@ -122,10 +124,10 @@ public class EntityController {
           content = @Content(schema = @Schema(implementation = MasterEntityDocument.class)))
   })
   @PostMapping("/search")
-  public ResponseEntity<List<MasterEntityDocument>> searchEntities(
+  public ResponseEntity<AppResponse<EntityResult<MasterEntitySearchResponseDTO>>> searchEntities(
       @RequestBody SearchDTO searchDTO) {
-    List<MasterEntityDocument> results =
-        masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
+    AppResponse<EntityResult<MasterEntitySearchResponseDTO>> results =
+      masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
     return ResponseEntity.ok(results);
   }
 }

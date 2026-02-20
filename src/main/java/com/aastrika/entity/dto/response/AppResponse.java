@@ -23,10 +23,10 @@ public class AppResponse<T> {
     response.setId(apiId);
     response.setVer("v1");
     response.setTs(OffsetDateTime.now(ZoneId.of("Asia/Kolkata")));
-    response.setResponseCode(status.toString());
+    response.setResponseCode(status.getReasonPhrase());
     response.setResult(result);
     Params params = new Params();
-    params.setStatus(status.toString());
+    params.setStatus(status.getReasonPhrase());
     response.setParams(params);
     return response;
   }
@@ -36,10 +36,10 @@ public class AppResponse<T> {
     response.setId(apiId);
     response.setVer("v1");
     response.setTs(OffsetDateTime.now(ZoneId.of("Asia/Kolkata")));
-    response.setResponseCode(status.toString());
+    response.setResponseCode(status.getReasonPhrase());
     Params params = new Params();
     params.setErrmsg(errorMessage);
-    params.setStatus(status.toString());
+    params.setStatus(status.getReasonPhrase());
     response.setParams(params);
     return response;
   }
