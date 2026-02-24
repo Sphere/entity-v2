@@ -21,5 +21,7 @@ public class HierarchyResponseDTO {
 
   private String language;
 
+  private String entityDescription;
+
   private List<EntityChildHierarchyDTO> childHierarchy;
 }

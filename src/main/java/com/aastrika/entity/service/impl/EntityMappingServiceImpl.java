@@ -9,21 +9,27 @@ import com.aastrika.entity.dto.response.EntityMappingResponseDTO;
 import com.aastrika.entity.dto.response.HierarchyResponseDTO;
 import com.aastrika.entity.exception.MissingMappingDataException;
 import com.aastrika.entity.exception.UpdateEntityException;
+import com.aastrika.entity.mapper.CompetencyLevelMapper;
 import com.aastrika.entity.mapper.EntityMapMapper;
 import com.aastrika.entity.model.EntityMap;
 import com.aastrika.entity.model.MasterEntity;
 import com.aastrika.entity.repository.jpa.EntityMapRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.aastrika.entity.repository.jpa.MasterEntityRepository;
 import com.aastrika.entity.service.EntityMappingService;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.util.StringUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +40,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
   private final EntityMapRepository entityMapRepository;
   private final EntityMapMapper entityMapMapper;
   private final MasterEntityRepository masterEntityRepository;
+  private final CompetencyLevelMapper competencyLevelMapper;
 
   /**
    * @param entityMappingRequestDTOList
@@ -47,23 +54,22 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     if (entityMappingRequestDTOList != null && !entityMappingRequestDTOList.isEmpty()) {
       for (EntityMappingRequestDTO entityMappingRequestDTO : entityMappingRequestDTOList) {
 
-        Optional<EntityMap> entityMapOptional =entityMapRepository.findByParentEntityCodeAndChildEntityCode(
+        List<EntityMap> entityMapList =entityMapRepository.findByParentEntityCodeAndParentEntityType(
           entityMappingRequestDTO.getParentEntityCode(),
-          entityMappingRequestDTO.getChildEntityCode()
+          entityMappingRequestDTO.getParentEntityType()
         );
 
-        EntityMap entityMap;
-        if (entityMapOptional.isPresent()) {
-          entityMap = entityMapOptional.get();
-          entityMap.setParentEntityCode(entityMappingRequestDTO.getParentEntityCode());
-          entityMap.setParentEntityType(entityMappingRequestDTO.getParentEntityType());
-          entityMap.setChildEntityCode(entityMappingRequestDTO.getChildEntityCode());
-          entityMap.setChildEntityType(entityMap.getChildEntityType());
-
-        } else {
-          entityMap = entityMapMapper.toEntity(entityMappingRequestDTO);
+        if (entityMapList != null && !entityMapList.isEmpty()) {
+          List<Integer> entityMapIds = entityMapList.stream()
+              .map(EntityMap::getId)
+                .toList();
+          entityMapRepository.deleteAllById(entityMapIds);
         }
-        entityMap.setCompetencyLevelList(getCompetencyLevelSeries(entityMappingRequestDTO.getCompetencies()));
+
+        EntityMap entityMap = entityMapMapper.toEntity(entityMappingRequestDTO);
+        if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(entityMappingRequestDTO.getChildEntityType())) {
+          entityMap.setCompetencyLevelList(getCompetencyLevelSeries(entityMappingRequestDTO.getCompetencies()));
+        }
         entityMaps.add(entityMap);
       }
 
@@ -95,60 +101,90 @@ public class EntityMappingServiceImpl implements EntityMappingService {
       entityMapRepository.findByParentEntityCodeAndParentEntityType(entitySearchRequestDTO.getEntityCode(),
         entitySearchRequestDTO.getEntityType());
 
-    if (entityMapList != null && !entityMapList.isEmpty()) {
-      Optional<MasterEntity> masterEntityOptional =
-        masterEntityRepository.findByCodeAndLanguageCode(entitySearchRequestDTO.getEntityCode(),
-          entitySearchRequestDTO.getEntityLanguage());
-
-      MasterEntity masterEntity = masterEntityOptional.orElseThrow(() -> new MissingMappingDataException(HttpStatus.BAD_REQUEST,
-        "Entity mapping details is missing"));
-
-      HierarchyResponseDTO hierarchyResponseDTO = HierarchyResponseDTO.builder()
-        .entityType(masterEntity.getEntityType())
-        .entityCode(masterEntity.getCode())
-        .entityName(masterEntity.getName())
-        .language(masterEntity.getLanguageCode())
-        .build();
-
-     List<String> childEntityCodeList = entityMapList.stream()
-       .map(EntityMap::getChildEntityCode)
-       .map(String::toUpperCase)
-       .toList();
-
-     hierarchyResponseDTO.setChildHierarchy(collectChildHierarchyDetails(childEntityCodeList, masterEntity.getLanguageCode()));
-      hierarchyResponseDTOList.add(hierarchyResponseDTO);
-    }
+    hierarchyResponseDTOList.add(buildParentChildHierarchyDetails(entitySearchRequestDTO.getEntityCode(),
+      entitySearchRequestDTO.getEntityLanguage(), entityMapList));
 
     return hierarchyResponseDTOList;
   }
 
+  /**
+   * Fetches full hierarchy details — parent entity, all child entities,
+   * and competency levels for each child if the child is of competency type.
+   *
+   * @param parentEntityCode    parent entity code
+   * @param language      language code for fetching entities
+   * @param entityMapList list of entity mappings for the parent
+   * @return HierarchyResponseDTO with parent info and populated child hierarchy
+   */
+  private HierarchyResponseDTO buildParentChildHierarchyDetails(String parentEntityCode, String language,
+                                                                List<EntityMap> entityMapList) {
+    // 1. Fetch parent entity
+    MasterEntity parentEntity = masterEntityRepository.findByCodeAndLanguageCode(parentEntityCode, language)
+      .orElseThrow(() -> new MissingMappingDataException(HttpStatus.BAD_REQUEST, "Parent entity not found"));
 
-  private List<EntityChildHierarchyDTO> collectChildHierarchyDetails(List<String> childEntityCodeList, String language) {
-    List<MasterEntity> masterEntityList = masterEntityRepository.findByCodeInAndLanguageCode(childEntityCodeList,
-      language);
+    // 2. Collect child entity codes from mappings
+    List<String> childEntityCodes = entityMapList.stream()
+      .map(EntityMap::getChildEntityCode)
+      .map(String::toUpperCase)
+      .toList();
 
-    if (masterEntityList != null && !masterEntityList.isEmpty()) {
-      List<EntityChildHierarchyDTO> entityChildHierarchyDTOList = masterEntityList.stream()
-        .map(masterEntity -> {
-          EntityChildHierarchyDTO childHierarchyDto = new EntityChildHierarchyDTO();
-          childHierarchyDto.setEntityType(masterEntity.getEntityType());
-          childHierarchyDto.setEntityCode(masterEntity.getCode());
-          childHierarchyDto.setEntityName(masterEntity.getName());
+    // 3. Build a lookup map: childEntityCode → applicable competency level numbers from EntityMap
+    Map<String, List<Integer>> childCompetencyMap = entityMapList.stream()
+      .collect(Collectors.toMap(
+        entityMap -> entityMap.getChildEntityCode().toUpperCase(),
+        entityMap -> convertStringifyCompetencyToInt(entityMap.getCompetencyLevelList())
+      ));
 
-          if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(masterEntity.getEntityType())) {
-            childHierarchyDto.setCompetencies(masterEntity.getCompetencyLevels().stream()
-              .map(competencyLevel -> CompetencyLevelDTO.builder()
-                .levelNumber(competencyLevel.getLevelNumber())
-                .levelName(competencyLevel.getLevelName())
-                .build())
-              .toList());
-          }
-          return childHierarchyDto;
-        }).toList();
+    // 4. Fetch all child entities in one query
+    List<MasterEntity> childEntities = masterEntityRepository.findByCodeInAndLanguageCode(childEntityCodes, language);
 
-      return entityChildHierarchyDTOList;
+    // 5. Build child hierarchy DTOs — filter competency levels by those defined in EntityMap
+    List<EntityChildHierarchyDTO> childHierarchyList = childEntities.stream()
+      .map(childEntity -> {
+        EntityChildHierarchyDTO childDto = new EntityChildHierarchyDTO();
+        childDto.setEntityType(childEntity.getEntityType());
+        childDto.setEntityCode(childEntity.getCode());
+        childDto.setEntityName(childEntity.getName());
+        childDto.setEntityDescription(childEntity.getDescription());
+
+        if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(childEntity.getEntityType())
+          && childEntity.getCompetencyLevels() != null) {
+          List<Integer> applicableLevels = childCompetencyMap.getOrDefault(
+            childEntity.getCode().toUpperCase(), List.of());
+
+          childDto.setCompetencies(
+            competencyLevelMapper.toCompetencyLevelDTOList(
+              childEntity.getCompetencyLevels().stream()
+                .filter(cl -> applicableLevels.contains(cl.getLevelNumber()))
+                .toList()));
+        }
+
+        return childDto;
+      })
+      .toList();
+
+    // 5. Build and return the full hierarchy response
+    return HierarchyResponseDTO.builder()
+      .entityType(parentEntity.getEntityType())
+      .entityCode(parentEntity.getCode())
+      .entityName(parentEntity.getName())
+      .language(parentEntity.getLanguageCode())
+      .entityDescription(parentEntity.getDescription())
+      .childHierarchy(childHierarchyList)
+      .build();
+  }
+
+
+  private List<Integer> convertStringifyCompetencyToInt(String competency) {
+    if (!StringUtil.isBlank(competency)) {
+      return Arrays.stream(competency.split(","))
+        .filter(s -> !s.isBlank())
+        .map(String::trim)
+        .filter(s -> s.matches("-?\\d+"))
+        .map(Integer::valueOf)
+        .toList();
     }
-
     return Collections.emptyList();
   }
+
 }

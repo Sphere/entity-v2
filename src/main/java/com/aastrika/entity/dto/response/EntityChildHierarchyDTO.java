@@ -17,5 +17,7 @@ public class EntityChildHierarchyDTO {
 
   private String entityName;
 
+  private String entityDescription;
+
   private List<CompetencyLevelDTO> competencies;
 }
