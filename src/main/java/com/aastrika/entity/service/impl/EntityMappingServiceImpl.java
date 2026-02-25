@@ -1,6 +1,6 @@
 package com.aastrika.entity.service.impl;
 
-import com.aastrika.entity.common.ApplicationConstants;
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.dto.request.CompetencyLevelDTO;
 import com.aastrika.entity.dto.request.EntityMappingRequestDTO;
 import com.aastrika.entity.dto.request.EntitySearchRequestDTO;
@@ -67,7 +67,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
         }
 
         EntityMap entityMap = entityMapMapper.toEntity(entityMappingRequestDTO);
-        if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(entityMappingRequestDTO.getChildEntityType())) {
+        if (EntityType.COMPETENCY == entityMappingRequestDTO.getChildEntityType()) {
           entityMap.setCompetencyLevelList(getCompetencyLevelSeries(entityMappingRequestDTO.getCompetencies()));
         }
         entityMaps.add(entityMap);
@@ -142,12 +142,12 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     List<EntityChildHierarchyDTO> childHierarchyList = childEntities.stream()
       .map(childEntity -> {
         EntityChildHierarchyDTO childDto = new EntityChildHierarchyDTO();
-        childDto.setEntityType(childEntity.getEntityType());
+        childDto.setEntityType(childEntity.getEntityType() != null ? childEntity.getEntityType().name() : null);
         childDto.setEntityCode(childEntity.getCode());
         childDto.setEntityName(childEntity.getName());
         childDto.setEntityDescription(childEntity.getDescription());
 
-        if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(childEntity.getEntityType())
+        if (EntityType.COMPETENCY == childEntity.getEntityType()
           && childEntity.getCompetencyLevels() != null) {
           List<Integer> applicableLevels = childCompetencyMap.getOrDefault(
             childEntity.getCode().toUpperCase(), List.of());
@@ -165,7 +165,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
 
     // 5. Build and return the full hierarchy response
     return HierarchyResponseDTO.builder()
-      .entityType(parentEntity.getEntityType())
+      .entityType(parentEntity.getEntityType() != null ? parentEntity.getEntityType().name() : null)
       .entityCode(parentEntity.getCode())
       .entityName(parentEntity.getName())
       .language(parentEntity.getLanguageCode())

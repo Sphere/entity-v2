@@ -1,5 +1,6 @@
 package com.aastrika.entity.repository.jpa;
 
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.model.MasterEntity;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +15,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MasterEntityRepository extends JpaRepository<MasterEntity, Integer> {
 
-  List<MasterEntity> findByEntityType(String type);
+  List<MasterEntity> findByEntityType(EntityType type);
 
   List<MasterEntity> findByCode(String code);
+
+  List<MasterEntity> findByCodeAndEntityType(String code, EntityType entityType);
 
   Optional<MasterEntity> findByCodeAndLanguageCode(String code, String languageCode);
 

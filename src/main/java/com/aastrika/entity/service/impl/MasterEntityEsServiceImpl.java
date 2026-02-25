@@ -106,7 +106,7 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
     // Must: exact match on entityType
     Query entityTypeFilter = new Query.Builder()
       .match(entityTypeTermQueryBuilder ->
-        entityTypeTermQueryBuilder.field("entityType").query(searchDTO.getEntityType()).fuzziness("AUTO"))
+        entityTypeTermQueryBuilder.field("entityType").query(searchDTO.getEntityType().name()).fuzziness("AUTO"))
       .build();
 
     boolean hasLanguage = !searchDTO.getLanguage().isBlank();

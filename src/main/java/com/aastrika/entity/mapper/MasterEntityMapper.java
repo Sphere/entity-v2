@@ -2,6 +2,7 @@ package com.aastrika.entity.mapper;
 
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.EntitySheetRow;
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.dto.request.CompetencyLevelDTO;
 import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
 import com.aastrika.entity.dto.response.CompetencyLevelResponseDTO;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface MasterEntityMapper {
@@ -26,6 +28,7 @@ public interface MasterEntityMapper {
 
   @Mapping(source = "language", target = "languageCode")
   @Mapping(source = "createdDate", target = "createdAt")
+  @Mapping(source = "entityType", target = "entityType", qualifiedByName = "stringToEntityType")
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "reviewedAt", ignore = true)
   @Mapping(target = "source", ignore = true)
@@ -57,6 +60,11 @@ public interface MasterEntityMapper {
     MasterEntitySearchResponseDTO dto = toSearchResponseDTO(document);
     dto.setLevels(mapCompetencyLevels(document));
     return dto;
+  }
+
+  @Named("stringToEntityType")
+  default EntityType stringToEntityType(String value) {
+    return EntityType.fromValue(value);
   }
 
   default List<CompetencyLevelDTO> mapCompetencyLevels(MasterEntityDocument document) {

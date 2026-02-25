@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.request.SearchDTO;
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.dto.response.EntityResult;
 import com.aastrika.entity.dto.response.MasterEntitySearchResponseDTO;
@@ -55,7 +56,7 @@ class MasterEntityEsServiceImplTest {
   void shouldReturnDocumentsForFuzzySearch() {
     // Arrange
     SearchDTO searchDTO = new SearchDTO();
-    searchDTO.setEntityType("COMPETENCY");
+    searchDTO.setEntityType(EntityType.COMPETENCY);
     searchDTO.setLanguage("en");
     searchDTO.setQuery("problem solving");
     searchDTO.setStrict(false);
@@ -103,7 +104,7 @@ class MasterEntityEsServiceImplTest {
   void shouldReturnDocumentsForPhraseSearch() {
     // Arrange
     SearchDTO searchDTO = new SearchDTO();
-    searchDTO.setEntityType("COMPETENCY");
+    searchDTO.setEntityType(EntityType.COMPETENCY);
     searchDTO.setLanguage("en");
     searchDTO.setQuery("communication skills");
     searchDTO.setStrict(true);
@@ -150,7 +151,7 @@ class MasterEntityEsServiceImplTest {
   void shouldReturnEmptyListWhenNoMatch() {
     // Arrange
     SearchDTO searchDTO = new SearchDTO();
-    searchDTO.setEntityType("COMPETENCY");
+    searchDTO.setEntityType(EntityType.COMPETENCY);
     searchDTO.setLanguage("en");
     searchDTO.setQuery("nonexistent");
     searchDTO.setStrict(false);

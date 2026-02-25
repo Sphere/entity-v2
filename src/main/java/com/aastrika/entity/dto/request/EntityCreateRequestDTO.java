@@ -1,5 +1,6 @@
 package com.aastrika.entity.dto.request;
 
+import com.aastrika.entity.enums.EntityType;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +23,7 @@ public class EntityCreateRequestDTO {
 
   // Updatable fields
   private String entityId;
-  private String entityType;
+  private EntityType entityType;
   private String type;
   private String area;
   private String name;

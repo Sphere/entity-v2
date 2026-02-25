@@ -2,6 +2,7 @@ package com.aastrika.entity.controller;
 
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
+import com.aastrika.entity.dto.request.EntityDeleteRequestDTO;
 import com.aastrika.entity.dto.request.EntityUpdateDTO;
 import com.aastrika.entity.dto.request.SearchDTO;
 import com.aastrika.entity.dto.response.AppResponse;
@@ -129,5 +130,21 @@ public class EntityController {
     AppResponse<EntityResult<MasterEntitySearchResponseDTO>> results =
       masterEntityEsService.findEntitiesBySearchParameter(searchDTO);
     return ResponseEntity.ok(results);
+  }
+
+  @Operation(
+      summary = "Delete entities",
+      description = "Delete one or more master entities by entityCode, entityType and language. "
+          + "Cascades deletion of entity mappings and competency levels.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Entities deleted successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid request"),
+      @ApiResponse(responseCode = "404", description = "Entity not found")
+  })
+  @DeleteMapping("/delete")
+  public ResponseEntity<AppResponse> deleteEntities(
+      @Valid @RequestBody List<EntityDeleteRequestDTO> deleteRequests) {
+    AppResponse response = masterEntityService.deleteMasterEntities(deleteRequests);
+    return ResponseEntity.ok(response);
   }
 }

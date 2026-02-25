@@ -1,6 +1,7 @@
 package com.aastrika.entity.service;
 
 import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
+import com.aastrika.entity.dto.request.EntityDeleteRequestDTO;
 import com.aastrika.entity.dto.request.EntityUpdateDTO;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.model.MasterEntity;
@@ -16,11 +17,5 @@ public interface MasterEntityService {
 
   AppResponse update(EntityUpdateDTO updateDTO, String userId);
 
-  List<MasterEntity> findByCode(String code);
-
-  List<MasterEntity> findAll();
-
-  List<MasterEntity> findByEntityType(String type);
-
-  void delete(Integer id);
+  AppResponse deleteMasterEntities(List<EntityDeleteRequestDTO> deleteRequests);
 }

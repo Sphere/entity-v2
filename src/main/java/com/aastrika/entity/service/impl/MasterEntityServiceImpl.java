@@ -1,12 +1,12 @@
 package com.aastrika.entity.service.impl;
 
-import com.aastrika.entity.common.ApplicationConstants;
-import com.aastrika.entity.common.EntitySheetHeadersConstant;
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.document.MasterEntityDocument;
 import com.aastrika.entity.dto.EntitySheetRow;
 import com.aastrika.entity.dto.request.CompetencyLevelDTO;
 import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
 import com.aastrika.entity.dto.request.EntityUpdateDTO;
+import com.aastrika.entity.dto.request.EntityDeleteRequestDTO;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.dto.response.EntityResponseDTO;
 import com.aastrika.entity.dto.response.EntityResult;
@@ -18,6 +18,7 @@ import com.aastrika.entity.model.MasterEntity;
 import com.aastrika.entity.reader.EntitySheetReader;
 import com.aastrika.entity.reader.EntitySheetReaderFactory;
 import com.aastrika.entity.repository.es.ElasticSearchEntityRepository;
+import com.aastrika.entity.repository.jpa.EntityMapRepository;
 import com.aastrika.entity.repository.jpa.MasterEntityRepository;
 import com.aastrika.entity.service.MasterEntityEsService;
 import com.aastrika.entity.service.MasterEntityService;
@@ -49,6 +50,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
 
   private final MasterEntityRepository masterEntityRepository;
   private final ElasticSearchEntityRepository elasticSearchEntityRepository;
+  private final EntityMapRepository entityMapRepository;
   private final MasterEntityMapper masterEntityMapper;
   private final EntitySheetReaderFactory entitySheetReaderFactory;
   private final EntityUtil entityUtil;
@@ -94,7 +96,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
         MasterEntity masterEntity = masterEntityMapper.toEntity(entitySheetRow);
         masterEntity.setCreatedBy(userId);
 
-        if (EntitySheetHeadersConstant.COMPETENCY_TYPE.equalsIgnoreCase(globalEntityType)) {
+        if (EntityType.COMPETENCY.name().equalsIgnoreCase(globalEntityType)) {
           List<CompetencyLevel> competencyLevels = entityUtil.getCompetencyListByEntity(entitySheetRow, masterEntity);
           masterEntity.setCompetencyLevels(competencyLevels);
         }
@@ -151,7 +153,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     masterEntity.setCreatedAt(new Date());
     masterEntity.setCreatedBy(userId);
 
-    if (ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(entityCreateRequestDTO.getEntityType())) {
+    if (EntityType.COMPETENCY == entityCreateRequestDTO.getEntityType()) {
       populateCompetencyInMasterEntity(masterEntity, entityCreateRequestDTO);
     }
 
@@ -229,7 +231,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     }
 
     // Update competency levels if provided
-    if (updateDTO.getCompetencyLevels() != null && ApplicationConstants.COMPETENCY_TYPE.equalsIgnoreCase(updateDTO.getEntityType())) {
+    if (updateDTO.getCompetencyLevels() != null && EntityType.COMPETENCY == updateDTO.getEntityType()) {
       updateCompetencyLevel(existingMasterEntity, updateDTO);
     }
 
@@ -273,29 +275,70 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     }
   }
 
-  @Transactional(readOnly = true)
   @Override
-  public List<MasterEntity> findByCode(String code) {
-    return masterEntityRepository.findByCode(code);
+  @Transactional
+  public AppResponse deleteMasterEntities(List<EntityDeleteRequestDTO> deleteRequestDTOList) {
+    if (deleteRequestDTOList == null || deleteRequestDTOList.isEmpty()) {
+      throw new UpdateEntityException(HttpStatus.BAD_REQUEST, "Delete request list cannot be empty");
+    }
+    validateLanguageOrPurge(deleteRequestDTOList);
+
+    for (EntityDeleteRequestDTO request : deleteRequestDTOList) {
+      if (Boolean.TRUE.equals(request.getPurgeAllLanguage())) {
+        List<MasterEntity> masterEntityAllVariants = masterEntityRepository.findByCodeAndEntityType(request.getEntityCode(), request.getEntityType());
+
+        if (masterEntityAllVariants.isEmpty()) {
+          throw new UpdateEntityException(HttpStatus.NOT_FOUND,"Entity not found by code: " + request.getEntityCode());
+        }
+
+        entityMapRepository.deleteByParentEntityCodeAndParentEntityType(request.getEntityCode(), request.getEntityType());
+        entityMapRepository.deleteByChildEntityCodeAndChildEntityType(request.getEntityCode(), request.getEntityType());
+
+        masterEntityRepository.deleteAll(masterEntityAllVariants);
+
+        masterEntityAllVariants.forEach(masterEntity ->
+            elasticSearchEntityRepository.deleteById(masterEntity.getCode() + "_" + masterEntity.getLanguageCode()));
+
+        log.info("Purged all {} language variant(s) for code={}", masterEntityAllVariants.size(), request.getEntityCode());
+      } else {
+        MasterEntity entity = masterEntityRepository
+            .findByCodeAndLanguageCode(request.getEntityCode(), request.getLanguage())
+            .orElseThrow(() -> new UpdateEntityException(HttpStatus.NOT_FOUND,
+                "Entity not found with code: " + request.getEntityCode() + " and language: " + request.getLanguage()));
+
+        List<MasterEntity> allLanguageVariants = masterEntityRepository.findByCodeAndEntityType(request.getEntityCode(), request.getEntityType());
+
+        if (allLanguageVariants.size() == 1) {
+          entityMapRepository.deleteByParentEntityCodeAndParentEntityType(
+              request.getEntityCode(), request.getEntityType());
+          entityMapRepository.deleteByChildEntityCodeAndChildEntityType(request.getEntityCode(), request.getEntityType());
+        } else {
+          log.info("Other language variants exist for code={} (total={}) — entity mappings preserved",
+              request.getEntityCode(), allLanguageVariants.size());
+        }
+
+        masterEntityRepository.delete(entity);
+        elasticSearchEntityRepository.deleteById(request.getEntityCode() + "_" + request.getLanguage());
+
+        log.info("Deleted entity: code={}, type={}, language={}",
+            request.getEntityCode(), request.getEntityType(), request.getLanguage());
+      }
+    }
+    return AppResponse.success("api.entity.delete", EntityResult.empty(), HttpStatus.OK);
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<MasterEntity> findAll() {
-    return masterEntityRepository.findAll();
+  private void validateLanguageOrPurge(List<EntityDeleteRequestDTO> deleteRequestDTOList) {
+    for (EntityDeleteRequestDTO dto : deleteRequestDTOList) {
+      boolean hasLanguage = dto.getLanguage() != null && !dto.getLanguage().isBlank();
+      boolean hasPurge = Boolean.TRUE.equals(dto.getPurgeAllLanguage());
+
+      if (!hasLanguage && !hasPurge) {
+        throw new UpdateEntityException(HttpStatus.BAD_REQUEST,
+            "Either language or purgeAllLanguage must be provided for entityCode: " + dto.getEntityCode());
+      }
+    }
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<MasterEntity> findByEntityType(String type) {
-    return masterEntityRepository.findByEntityType(type);
-  }
-
-  @Override
-  public void delete(Integer id) {
-    masterEntityRepository.deleteById(id);
-    elasticSearchEntityRepository.deleteById(String.valueOf(id));
-  }
 
   private void upsertToElasticsearch(MasterEntity entity) {
     // Use code + languageCode as unique ES document ID
@@ -304,7 +347,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     MasterEntityDocument document = MasterEntityDocument.builder()
         .id(esDocId)
         .entityId(entity.getEntityId())
-        .entityType(entity.getEntityType())
+        .entityType(entity.getEntityType() != null ? entity.getEntityType().name() : null)
         .type(entity.getType())
         .code(entity.getCode())
         .name(entity.getName())

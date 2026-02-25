@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.aastrika.entity.document.MasterEntityDocument;
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.dto.request.EntityCreateRequestDTO;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.exception.UpdateEntityException;
@@ -63,7 +64,7 @@ class MasterEntityServiceImplTest {
     EntityCreateRequestDTO requestDTO = new EntityCreateRequestDTO();
     requestDTO.setCode("PS001");
     requestDTO.setLanguageCode("en");
-    requestDTO.setEntityType("ROLE");
+    requestDTO.setEntityType(EntityType.ROLE);
     requestDTO.setType("Role");
     requestDTO.setName("Problem Solving");
     requestDTO.setDescription("Ability to solve problems");
@@ -72,7 +73,7 @@ class MasterEntityServiceImplTest {
     MasterEntity mappedEntity = MasterEntity.builder()
         .name("Problem Solving")
         .type("Role")
-        .entityType("ROLE")
+        .entityType(EntityType.ROLE)
         .description("Ability to solve problems")
         .code("PS001")
         .languageCode("en")

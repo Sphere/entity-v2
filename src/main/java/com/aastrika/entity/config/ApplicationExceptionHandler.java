@@ -3,6 +3,7 @@ package com.aastrika.entity.config;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.exception.ApiRuntimeException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @RestControllerAdvice
 @Slf4j
@@ -28,6 +30,17 @@ public class ApplicationExceptionHandler {
   public ResponseEntity<AppResponse> handleValidationException(MethodArgumentNotValidException exception) {
     String errorMessages = exception.getBindingResult().getFieldErrors().stream()
         .map(error -> error.getField() + ": " + error.getDefaultMessage())
+        .collect(Collectors.joining(", "));
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(AppResponse.error(null, errorMessages, HttpStatus.BAD_REQUEST));
+  }
+
+  @ExceptionHandler(HandlerMethodValidationException.class)
+  public ResponseEntity<AppResponse> handleMethodValidationException(HandlerMethodValidationException exception) {
+    String errorMessages = Stream.concat(exception.getBeanResults().stream(), exception.getValueResults().stream())
+        .flatMap(result -> result.getResolvableErrors().stream())
+        .map(error -> error.getDefaultMessage())
         .collect(Collectors.joining(", "));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)

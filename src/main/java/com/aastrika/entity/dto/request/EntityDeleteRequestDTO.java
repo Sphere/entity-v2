@@ -12,16 +12,18 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EntitySearchRequestDTO {
-  @NotNull(message = "Entity type must not be blank")
-  private EntityType entityType;
+public class EntityDeleteRequestDTO {
 
-  @NotBlank(message = "Entity code must not be blank")
+  @NotBlank(message = "entityCode is required")
   @Setter(AccessLevel.NONE)
   private String entityCode;
 
-  @NotBlank(message = "Entity language must not be blank")
-  private String entityLanguage;
+  @NotNull(message = "entityType is required")
+  private EntityType entityType;
+
+  private String language;
+
+  private Boolean purgeAllLanguage = false;
 
   public void setEntityCode(String entityCode) {
     this.entityCode = entityCode != null ? entityCode.toUpperCase() : null;
