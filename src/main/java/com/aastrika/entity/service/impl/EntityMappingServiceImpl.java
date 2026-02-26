@@ -6,6 +6,7 @@ import com.aastrika.entity.dto.request.EntityMappingRequestDTO;
 import com.aastrika.entity.dto.request.EntitySearchRequestDTO;
 import com.aastrika.entity.dto.response.EntityChildHierarchyDTO;
 import com.aastrika.entity.dto.response.EntityMappingResponseDTO;
+import com.aastrika.entity.dto.response.FullHierarchyNodeDTO;
 import com.aastrika.entity.dto.response.HierarchyResponseDTO;
 import com.aastrika.entity.exception.MissingMappingDataException;
 import com.aastrika.entity.exception.UpdateEntityException;
@@ -19,9 +20,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.aastrika.entity.repository.jpa.MasterEntityRepository;
@@ -54,6 +58,11 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     if (entityMappingRequestDTOList != null && !entityMappingRequestDTOList.isEmpty()) {
       for (EntityMappingRequestDTO entityMappingRequestDTO : entityMappingRequestDTOList) {
 
+        validateEntityExists(entityMappingRequestDTO.getParentEntityCode(),
+            entityMappingRequestDTO.getParentEntityType(), "Parent");
+        validateEntityExists(entityMappingRequestDTO.getChildEntityCode(),
+            entityMappingRequestDTO.getChildEntityType(), "Child");
+
         List<EntityMap> entityMapList =entityMapRepository.findByParentEntityCodeAndParentEntityType(
           entityMappingRequestDTO.getParentEntityCode(),
           entityMappingRequestDTO.getParentEntityType()
@@ -64,6 +73,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
               .map(EntityMap::getId)
                 .toList();
           entityMapRepository.deleteAllById(entityMapIds);
+          entityMapRepository.flush();
         }
 
         EntityMap entityMap = entityMapMapper.toEntity(entityMappingRequestDTO);
@@ -79,14 +89,71 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     return List.of();
   }
 
+  private void validateEntityExists(String code, EntityType entityType, String role) {
+    List<MasterEntity> entities = masterEntityRepository.findByCodeAndEntityType(code, entityType);
+    if (entities.isEmpty()) {
+      throw new UpdateEntityException(HttpStatus.NOT_FOUND,
+          role + " entity not found with code: " + code + " and type: " + entityType.name());
+    }
+  }
+
   private String getCompetencyLevelSeries(List<Integer> competencyLevels) {
     String levelSeries = "";
-    if (competencyLevels != null || !competencyLevels.isEmpty()) {
+    if (competencyLevels != null && !competencyLevels.isEmpty()) {
       levelSeries = competencyLevels.stream()
         .map(String::valueOf)
         .collect(Collectors.joining(","));
     }
     return levelSeries;
+  }
+
+  @Override
+  public FullHierarchyNodeDTO getFullHierarchy(EntitySearchRequestDTO entitySearchRequestDTO) {
+    return buildFullHierarchyNode(
+        entitySearchRequestDTO.getEntityCode(),
+        entitySearchRequestDTO.getEntityType(),
+        entitySearchRequestDTO.getEntityLanguage(),
+        new HashSet<>()
+    );
+  }
+
+  private FullHierarchyNodeDTO buildFullHierarchyNode(String entityCode, EntityType entityType,
+                                                      String language, Set<String> visited) {
+    String visitKey = entityCode + "_" + entityType.name();
+    if (visited.contains(visitKey)) {
+      return null;
+    }
+    visited.add(visitKey);
+
+    MasterEntity entity = masterEntityRepository.findByCodeAndLanguageCode(entityCode, language)
+        .orElseThrow(() -> new MissingMappingDataException(HttpStatus.NOT_FOUND,
+            "Entity not found with code: " + entityCode + " and language: " + language));
+
+    FullHierarchyNodeDTO node = FullHierarchyNodeDTO.builder()
+        .entityType(entityType.name())
+        .entityCode(entity.getCode())
+        .entityName(entity.getName())
+        .entityDescription(entity.getDescription())
+        .language(language)
+        .build();
+
+    if (EntityType.COMPETENCY == entityType && entity.getCompetencyLevels() != null) {
+      node.setCompetencies(competencyLevelMapper.toCompetencyLevelDTOList(entity.getCompetencyLevels()));
+    }
+
+    List<EntityMap> childMappings = entityMapRepository
+        .findByParentEntityCodeAndParentEntityType(entityCode, entityType);
+
+    if (!childMappings.isEmpty()) {
+      List<FullHierarchyNodeDTO> children = childMappings.stream()
+          .map(mapping -> buildFullHierarchyNode(
+              mapping.getChildEntityCode(), mapping.getChildEntityType(), language, visited))
+          .filter(Objects::nonNull)
+          .toList();
+      node.setChildren(children);
+    }
+
+    return node;
   }
 
   /**

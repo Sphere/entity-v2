@@ -349,6 +349,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
         .entityId(entity.getEntityId())
         .entityType(entity.getEntityType() != null ? entity.getEntityType().name() : null)
         .type(entity.getType())
+        .area(entity.getArea())
         .code(entity.getCode())
         .name(entity.getName())
         .description(entity.getDescription())
