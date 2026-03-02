@@ -31,4 +31,6 @@ public interface EntityMapRepository extends JpaRepository<EntityMap, Integer> {
   boolean existsByParentEntityCodeAndParentEntityType(String parentEntityCode, EntityType parentEntityType);
 
   boolean existsByChildEntityCodeAndChildEntityType(String childEntityCode, EntityType childEntityType);
+
+  List<EntityMap> findByParentEntityCodeIn(List<String> parentEntityCodes);
 }

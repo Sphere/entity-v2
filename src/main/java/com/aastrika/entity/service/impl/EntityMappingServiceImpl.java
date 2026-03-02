@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,12 +30,15 @@ import java.util.stream.Collectors;
 import com.aastrika.entity.repository.jpa.MasterEntityRepository;
 import com.aastrika.entity.service.EntityMappingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.StringUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EntityMappingServiceImpl implements EntityMappingService {
@@ -45,6 +47,9 @@ public class EntityMappingServiceImpl implements EntityMappingService {
   private final EntityMapMapper entityMapMapper;
   private final MasterEntityRepository masterEntityRepository;
   private final CompetencyLevelMapper competencyLevelMapper;
+
+//  @Value("${entity-map.allowed-type-combinations}")
+//  private Set<String> allowedTypeCombinations;
 
   /**
    * @param entityMappingRequestDTOList
@@ -58,6 +63,8 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     if (entityMappingRequestDTOList != null && !entityMappingRequestDTOList.isEmpty()) {
       for (EntityMappingRequestDTO entityMappingRequestDTO : entityMappingRequestDTOList) {
 
+//        validateMappingStructure(entityMappingRequestDTO.getParentEntityType(),
+//            entityMappingRequestDTO.getChildEntityType());
         validateEntityExists(entityMappingRequestDTO.getParentEntityCode(),
             entityMappingRequestDTO.getParentEntityType(), "Parent");
         validateEntityExists(entityMappingRequestDTO.getChildEntityCode(),
@@ -89,6 +96,14 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     return List.of();
   }
 
+//  private void validateMappingStructure(EntityType parentType, EntityType childType) {
+//    String combination = parentType.name() + "_" + childType.name();
+//    if (!allowedTypeCombinations.contains(combination)) {
+//      throw new UpdateEntityException(HttpStatus.BAD_REQUEST,
+//          "Invalid mapping structure: " + combination + ". Allowed combinations: " + allowedTypeCombinations);
+//    }
+//  }
+
   private void validateEntityExists(String code, EntityType entityType, String role) {
     List<MasterEntity> entities = masterEntityRepository.findByCodeAndEntityType(code, entityType);
     if (entities.isEmpty()) {
@@ -109,46 +124,76 @@ public class EntityMappingServiceImpl implements EntityMappingService {
 
   @Override
   public FullHierarchyNodeDTO getFullHierarchy(EntitySearchRequestDTO entitySearchRequestDTO) {
-    return buildFullHierarchyNode(
+    // Build adjacency map level by level — only loads the relevant subtree
+    Map<String, List<EntityMap>> adjacencyMap = new HashMap<>();
+    Set<String> allCodes = new HashSet<>();
+    allCodes.add(entitySearchRequestDTO.getEntityCode());
+
+    Set<String> currentLevel = new HashSet<>();
+    currentLevel.add(entitySearchRequestDTO.getEntityCode());
+
+    while (!currentLevel.isEmpty()) {
+      List<EntityMap> mappings = entityMapRepository.findByParentEntityCodeIn(new ArrayList<>(currentLevel));
+      Set<String> nextLevel = new HashSet<>();
+      for (EntityMap mapping : mappings) {
+        adjacencyMap.computeIfAbsent(mapping.getParentEntityCode(), k -> new ArrayList<>()).add(mapping);
+        if (allCodes.add(mapping.getChildEntityCode())) {
+          nextLevel.add(mapping.getChildEntityCode());
+        }
+      }
+      currentLevel = nextLevel;
+    }
+
+    log.debug("BFS allCodes: {}", allCodes);
+    log.debug("adjacencyMap keys: {}", adjacencyMap.keySet());
+
+    // Batch fetch all entity details for the collected codes
+    Map<String, MasterEntity> entityLookup = masterEntityRepository
+        .findByCodeInAndLanguageCode(new ArrayList<>(allCodes), entitySearchRequestDTO.getEntityLanguage())
+        .stream()
+        .collect(Collectors.toMap(MasterEntity::getCode, e -> e));
+
+    log.debug("entityLookup keys: {}", entityLookup.keySet());
+
+    return buildNodeFromMemory(
         entitySearchRequestDTO.getEntityCode(),
         entitySearchRequestDTO.getEntityType(),
-        entitySearchRequestDTO.getEntityLanguage(),
-        new HashSet<>()
+        null,
+        adjacencyMap,
+        entityLookup
     );
   }
 
-  private FullHierarchyNodeDTO buildFullHierarchyNode(String entityCode, EntityType entityType,
-                                                      String language, Set<String> visited) {
-    String visitKey = entityCode + "_" + entityType.name();
-    if (visited.contains(visitKey)) {
-      return null;
-    }
-    visited.add(visitKey);
-
-    MasterEntity entity = masterEntityRepository.findByCodeAndLanguageCode(entityCode, language)
-        .orElseThrow(() -> new MissingMappingDataException(HttpStatus.NOT_FOUND,
-            "Entity not found with code: " + entityCode + " and language: " + language));
+  private FullHierarchyNodeDTO buildNodeFromMemory(String code, EntityType entityType,
+                                                   String competencyLevelList,
+                                                   Map<String, List<EntityMap>> adjacencyMap,
+                                                   Map<String, MasterEntity> entityLookup) {
+    MasterEntity entity = entityLookup.get(code);
+    if (entity == null) return null;
 
     FullHierarchyNodeDTO node = FullHierarchyNodeDTO.builder()
-        .entityType(entityType.name())
+        .entityType(entityType != null ? entityType.name() : null)
         .entityCode(entity.getCode())
         .entityName(entity.getName())
         .entityDescription(entity.getDescription())
-        .language(language)
+        .language(entity.getLanguageCode())
         .build();
 
     if (EntityType.COMPETENCY == entityType && entity.getCompetencyLevels() != null) {
-      node.setCompetencies(competencyLevelMapper.toCompetencyLevelDTOList(entity.getCompetencyLevels()));
+      List<Integer> applicableLevels = convertStringifyCompetencyToInt(competencyLevelList);
+      if (!applicableLevels.isEmpty()) {
+        node.setCompetencies(competencyLevelMapper.toCompetencyLevelDTOList(
+            entity.getCompetencyLevels().stream()
+                .filter(cl -> applicableLevels.contains(cl.getLevelNumber()))
+                .toList()));
+      }
     }
 
-    List<EntityMap> childMappings = entityMapRepository
-        .findByParentEntityCodeAndParentEntityType(entityCode, entityType);
-
+    List<EntityMap> childMappings = adjacencyMap.getOrDefault(code, List.of());
     if (!childMappings.isEmpty()) {
       List<FullHierarchyNodeDTO> children = childMappings.stream()
-          .map(mapping -> buildFullHierarchyNode(
-              mapping.getChildEntityCode(), mapping.getChildEntityType(), language, visited))
-          .filter(Objects::nonNull)
+          .map(em -> buildNodeFromMemory(em.getChildEntityCode(), em.getChildEntityType(),
+              em.getCompetencyLevelList(), adjacencyMap, entityLookup))
           .toList();
       node.setChildren(children);
     }
