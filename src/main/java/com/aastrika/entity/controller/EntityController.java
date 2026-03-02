@@ -93,10 +93,10 @@ public class EntityController {
   })
   @PutMapping("/update")
   public ResponseEntity<AppResponse> update(
-      @Valid @RequestBody EntityUpdateDTO updateDTO,
+      @Valid @RequestBody List<EntityUpdateDTO> updateDTOList,
       @Parameter(description = "User ID performing the update") @RequestParam("userId") String userId) {
-    AppResponse appResponse = masterEntityService.update(updateDTO, userId);
-    return ResponseEntity.status(HttpStatus.CREATED).body(appResponse);
+    AppResponse appResponse = masterEntityService.update(updateDTOList, userId);
+    return ResponseEntity.status(HttpStatus.OK).body(appResponse);
   }
 
   @Operation(

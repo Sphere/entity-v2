@@ -178,24 +178,43 @@ public class MasterEntityServiceImpl implements MasterEntityService {
   }
 
   /**
-   * @param updateDTO
+   * @param updateDTOList
    * @param userId
    * @return
    */
   @Override
-  public AppResponse update(EntityUpdateDTO updateDTO, String userId) {
-    Optional<MasterEntity> existingMasterEntityOptional = masterEntityRepository
-        .findByCodeAndLanguageCode(updateDTO.getCode(), updateDTO.getLanguageCode());
-
-    MasterEntity existingMasterEntity = existingMasterEntityOptional.orElseThrow(() ->
-      new UpdateEntityException(HttpStatus.NOT_FOUND, "Entity code " + updateDTO.getCode() +
-        " with language " + updateDTO.getLanguageCode() + " not found for update"));
+  public AppResponse update(List<EntityUpdateDTO> updateDTOList, String userId) {
+    if (updateDTOList == null || updateDTOList.isEmpty()) {
+      throw new UpdateEntityException(HttpStatus.BAD_REQUEST, "Update request list cannot be empty");
+    }
 
     if (StringUtil.isBlank(userId)) {
       throw new UpdateEntityException(HttpStatus.BAD_REQUEST, "Unable to find user id details");
     }
 
-    // Update basic fields (only if provided in DTO)
+    List<MasterEntity> updatedEntities = new ArrayList<>();
+
+    for (EntityUpdateDTO updateDTO : updateDTOList) {
+      MasterEntity existingMasterEntity = masterEntityRepository
+          .findByCodeAndLanguageCode(updateDTO.getCode(), updateDTO.getLanguageCode())
+          .orElseThrow(() -> new UpdateEntityException(HttpStatus.NOT_FOUND,
+              "Entity code " + updateDTO.getCode() + " with language " + updateDTO.getLanguageCode() + " not found for update"));
+
+      applyUpdate(existingMasterEntity, updateDTO, userId);
+      updatedEntities.add(existingMasterEntity);
+    }
+
+    List<MasterEntity> savedEntities = masterEntityRepository.saveAll(updatedEntities);
+    savedEntities.forEach(this::upsertToElasticsearch);
+
+    List<EntityResponseDTO> responseDTOs = savedEntities.stream()
+        .map(masterEntityMapper::toResponseDTO)
+        .toList();
+
+    return AppResponse.success("api.entity.update", EntityResult.of(responseDTOs), HttpStatus.OK);
+  }
+
+  private void applyUpdate(MasterEntity existingMasterEntity, EntityUpdateDTO updateDTO, String userId) {
     if (updateDTO.getEntityId() != null) {
       existingMasterEntity.setEntityId(updateDTO.getEntityId());
     }
@@ -230,22 +249,12 @@ public class MasterEntityServiceImpl implements MasterEntityService {
       existingMasterEntity.setAdditionalProperties(updateDTO.getAdditionalProperties());
     }
 
-    // Update competency levels if provided
     if (updateDTO.getCompetencyLevels() != null && EntityType.COMPETENCY == updateDTO.getEntityType()) {
       updateCompetencyLevel(existingMasterEntity, updateDTO);
     }
 
     existingMasterEntity.setUpdatedAt(new Date());
     existingMasterEntity.setUpdatedBy(userId);
-
-    MasterEntity updatedMasterEntity = masterEntityRepository.save(existingMasterEntity);
-    upsertToElasticsearch(updatedMasterEntity);
-    return getUpdatedWrappedResponse(updatedMasterEntity);
-  }
-
-  private AppResponse getUpdatedWrappedResponse(MasterEntity updatedMasterEntity) {
-    EntityResponseDTO entityResponseDTO = masterEntityMapper.toResponseDTO(updatedMasterEntity);
-    return AppResponse.success("api.entity.update", EntityResult.of(entityResponseDTO), HttpStatus.OK);
   }
 
   /**
