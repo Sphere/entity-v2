@@ -48,8 +48,8 @@ public class EntityMappingServiceImpl implements EntityMappingService {
   private final MasterEntityRepository masterEntityRepository;
   private final CompetencyLevelMapper competencyLevelMapper;
 
-//  @Value("${entity-map.allowed-type-combinations}")
-//  private Set<String> allowedTypeCombinations;
+  @Value("${entity-map.allowed-type-combinations}")
+  private Set<String> allowedTypeCombinations;
 
   /**
    * @param entityMappingRequestDTOList
@@ -63,8 +63,8 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     if (entityMappingRequestDTOList != null && !entityMappingRequestDTOList.isEmpty()) {
       for (EntityMappingRequestDTO entityMappingRequestDTO : entityMappingRequestDTOList) {
 
-//        validateMappingStructure(entityMappingRequestDTO.getParentEntityType(),
-//            entityMappingRequestDTO.getChildEntityType());
+        validateMappingStructure(entityMappingRequestDTO.getParentEntityType(),
+            entityMappingRequestDTO.getChildEntityType());
         validateEntityExists(entityMappingRequestDTO.getParentEntityCode(),
             entityMappingRequestDTO.getParentEntityType(), "Parent");
         validateEntityExists(entityMappingRequestDTO.getChildEntityCode(),
@@ -96,13 +96,13 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     return List.of();
   }
 
-//  private void validateMappingStructure(EntityType parentType, EntityType childType) {
-//    String combination = parentType.name() + "_" + childType.name();
-//    if (!allowedTypeCombinations.contains(combination)) {
-//      throw new UpdateEntityException(HttpStatus.BAD_REQUEST,
-//          "Invalid mapping structure: " + combination + ". Allowed combinations: " + allowedTypeCombinations);
-//    }
-//  }
+  private void validateMappingStructure(EntityType parentType, EntityType childType) {
+    String combination = parentType.name() + "_" + childType.name();
+    if (!allowedTypeCombinations.contains(combination)) {
+      throw new UpdateEntityException(HttpStatus.BAD_REQUEST,
+          "Invalid mapping structure: " + combination + ". Allowed combinations: " + allowedTypeCombinations);
+    }
+  }
 
   private void validateEntityExists(String code, EntityType entityType, String role) {
     List<MasterEntity> entities = masterEntityRepository.findByCodeAndEntityType(code, entityType);
