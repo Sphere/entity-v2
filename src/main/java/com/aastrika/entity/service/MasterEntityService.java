@@ -15,7 +15,7 @@ public interface MasterEntityService {
 
   AppResponse create(EntityCreateRequestDTO entityCreateRequestDTO, String userId);
 
-  AppResponse update(EntityUpdateDTO updateDTO, String userId);
+  AppResponse update(List<EntityUpdateDTO> updateDTOList, String userId);
 
   AppResponse deleteMasterEntities(List<EntityDeleteRequestDTO> deleteRequests);
 }

@@ -1,0 +1,393 @@
+id,level_description,level_name,level_number,code,language_code
+1729,"- Performs quality checks at designated intervals
+- Provides support services following guidelines",Advanced capability demonstration,3,C3,en
+1730,"- Adheres to safety and quality standards consistently
+- Reviews and updates processes as required
+- Evaluates performance metrics against defined benchmarks",Standards compliance review,4,C3,en
+1734,"- Reviews and updates processes as required
+- Provides support services following guidelines
+- Demonstrates proficiency in core competency areas",Quality verification process,3,C4,en
+1731,"- Adheres to safety and quality standards consistently
+- Provides support services following guidelines
+- Coordinates resources effectively to meet operational requirements",Regulatory requirement fulfillment,5,C3,en
+1732,"- Demonstrates proficiency in core competency areas
+- Manages workflow according to established protocols
+- Monitors processes to ensure compliance with standards",Subject matter expertise,1,C4,en
+1733,"- Adheres to safety and quality standards consistently
+- Demonstrates proficiency in core competency areas
+- Documents activities using prescribed formats",Comprehensive system management,2,C4,en
+1717,- Maintains accurate documentation as per regulatory guidelines,Documentation review phase,1,C1,en
+1718,"- Applies technical knowledge in practical work scenarios
+- Evaluates outcomes based on success criteria
+- Implements corrective measures when needed",Operational standard review,2,C1,en
+1719,"- Tracks progress using appropriate tools and methods
+- Reviews established procedures and protocols according to organizational standards",Standards compliance review,3,C1,en
+1720,"- Implements systematic approaches for quality service delivery
+- Manages workflow according to established protocols",Guidelines adherence check,4,C1,en
+1721,"- Applies technical knowledge in practical work scenarios
+- Coordinates with team members for optimal results",Routine monitoring activity,5,C1,en
+1722,"- Reviews and updates processes as required
+- Demonstrates proficiency in core competency areas",Advanced skill application,1,C2,en
+1723,- Tracks progress using appropriate tools and methods,Quality assurance measure,2,C2,en
+1724,"- Evaluates outcomes based on success criteria
+- Performs quality checks at designated intervals
+- Implements systematic approaches for quality service delivery",Performance evaluation cycle,3,C2,en
+1725,- Performs quality checks at designated intervals,Quality assurance measure,4,C2,en
+1726,"- Reviews and updates processes as required
+- Reviews established procedures and protocols according to organizational standards
+- Implements corrective measures when needed",Resource coordination task,5,C2,en
+1727,"- Monitors processes to ensure compliance with standards
+- Documents activities using prescribed formats
+- Implements corrective measures when needed",Basic protocol understanding,1,C3,en
+1728,"- Maintains accurate documentation as per regulatory guidelines
+- Performs quality checks at designated intervals
+- Reviews and updates processes as required",Routine monitoring activity,2,C3,en
+1735,"- Follows standardized procedures for task completion
+- Applies technical knowledge in practical work scenarios",Intermediate proficiency level,4,C4,en
+1736,- Coordinates resources effectively to meet operational requirements,Resource coordination task,5,C4,en
+1737,- Performs quality checks at designated intervals,Systematic approach implementation,1,C5,en
+1738,"- Evaluates performance metrics against defined benchmarks
+- Demonstrates proficiency in core competency areas",Subject matter expertise,2,C5,en
+1739,- Evaluates outcomes based on success criteria,Procedure accuracy verification,3,C5,en
+1740,- Adheres to safety and quality standards consistently,Training module completion,4,C5,en
+1741,- Implements corrective measures when needed,Mastery level performance,5,C5,en
+1742,- Evaluates outcomes based on success criteria,Advanced skill application,1,C6,en
+1743,- Implements systematic approaches for quality service delivery,Routine monitoring activity,2,C6,en
+1744,- Manages workflow according to established protocols,Advanced capability demonstration,3,C6,en
+1745,"- Provides support services following guidelines
+- Maintains accurate documentation as per regulatory guidelines",Standards compliance review,4,C6,en
+1746,"- Demonstrates proficiency in core competency areas
+- Monitors processes to ensure compliance with standards",Guidelines adherence check,5,C6,en
+1747,- Adheres to safety and quality standards consistently,Intermediate proficiency level,1,C7,en
+1748,"- Monitors processes to ensure compliance with standards
+- Implements systematic approaches for quality service delivery",Baseline competency achievement,2,C7,en
+1749,"- Demonstrates proficiency in core competency areas
+- Reviews and updates processes as required
+- Applies technical knowledge in practical work scenarios",Quality assurance measure,3,C7,en
+1750,"- Coordinates with team members for optimal results
+- Tracks progress using appropriate tools and methods
+- Implements corrective measures when needed",Process improvement stage,4,C7,en
+1751,- Reviews established procedures and protocols according to organizational standards,Quality assurance measure,5,C7,en
+1752,"- Coordinates with team members for optimal results
+- Adheres to safety and quality standards consistently",Compliance check procedure,1,C8,en
+1753,"- Provides support services following guidelines
+- Adheres to safety and quality standards consistently
+- Monitors processes to ensure compliance with standards",Advanced capability demonstration,2,C8,en
+1754,"- Evaluates outcomes based on success criteria
+- Conducts routine assessments following approved methodologies",Compliance check procedure,3,C8,en
+1755,"- Tracks progress using appropriate tools and methods
+- Adheres to safety and quality standards consistently",Baseline competency achievement,4,C8,en
+1756,"- Conducts routine assessments following approved methodologies
+- Maintains accurate documentation as per regulatory guidelines
+- Documents activities using prescribed formats",Procedure accuracy verification,5,C8,en
+1757,"- Tracks progress using appropriate tools and methods
+- Implements systematic approaches for quality service delivery
+- Implements corrective measures when needed",Technical skill demonstration,1,C9,en
+1758,"- Provides support services following guidelines
+- Coordinates resources effectively to meet operational requirements
+- Maintains accurate documentation as per regulatory guidelines",Best practices application,2,C9,en
+1759,"- Reviews established procedures and protocols according to organizational standards
+- Coordinates resources effectively to meet operational requirements",Guidelines adherence check,3,C9,en
+1760,"- Conducts routine assessments following approved methodologies
+- Reviews and updates processes as required
+- Applies technical knowledge in practical work scenarios",Advanced capability demonstration,4,C9,en
+1761,"- Adheres to safety and quality standards consistently
+- Provides support services following guidelines",Standards compliance review,5,C9,en
+1762,- Follows standardized procedures for task completion,Process improvement stage,1,C10,en
+1763,"- Coordinates with team members for optimal results
+- Provides support services following guidelines",Documentation review phase,2,C10,en
+1764,"- Implements corrective measures when needed
+- Applies technical knowledge in practical work scenarios
+- Reviews established procedures and protocols according to organizational standards",Professional competency level,3,C10,en
+1765,"- Performs quality checks at designated intervals
+- Reviews and updates processes as required
+- Coordinates resources effectively to meet operational requirements",Mastery level performance,4,C10,en
+1766,- Adheres to safety and quality standards consistently,Comprehensive system management,5,C10,en
+1767,- Monitors processes to ensure compliance with standards,Initial assessment completion,1,C11,en
+1768,"- Documents activities using prescribed formats
+- Evaluates outcomes based on success criteria
+- Reviews and updates processes as required",Standard procedure execution,2,C11,en
+1769,- Implements systematic approaches for quality service delivery,Comprehensive system management,3,C11,en
+1770,"- Follows standardized procedures for task completion
+- Reviews and updates processes as required
+- Maintains accurate documentation as per regulatory guidelines",Procedure accuracy verification,4,C11,en
+1771,"- Monitors processes to ensure compliance with standards
+- Implements corrective measures when needed
+- Evaluates performance metrics against defined benchmarks",Process improvement stage,5,C11,en
+1772,"- Evaluates performance metrics against defined benchmarks
+- Manages workflow according to established protocols",Guidelines adherence check,1,C12,en
+1773,"- Implements systematic approaches for quality service delivery
+- Demonstrates proficiency in core competency areas
+- Reviews and updates processes as required",Compliance check procedure,2,C12,en
+1774,- Reviews established procedures and protocols according to organizational standards,Quality verification process,3,C12,en
+1775,"- Tracks progress using appropriate tools and methods
+- Adheres to safety and quality standards consistently
+- Coordinates with team members for optimal results",Subject matter expertise,4,C12,en
+1776,"- Implements systematic approaches for quality service delivery
+- Coordinates resources effectively to meet operational requirements",Quality assurance measure,5,C12,en
+1777,"- Evaluates performance metrics against defined benchmarks
+- Applies technical knowledge in practical work scenarios
+- Evaluates outcomes based on success criteria",Guidelines adherence check,1,C13,en
+1778,"- Implements systematic approaches for quality service delivery
+- Conducts routine assessments following approved methodologies
+- Applies technical knowledge in practical work scenarios",Best practices application,2,C13,en
+1779,- Documents activities using prescribed formats,Initial assessment completion,3,C13,en
+1780,"- Reviews established procedures and protocols according to organizational standards
+- Conducts routine assessments following approved methodologies",Expert methodology practice,4,C13,en
+1781,"- Adheres to safety and quality standards consistently
+- Maintains accurate documentation as per regulatory guidelines",Professional competency level,5,C13,en
+1782,- Coordinates resources effectively to meet operational requirements,Routine monitoring activity,1,C14,en
+1783,"- Evaluates performance metrics against defined benchmarks
+- Coordinates with team members for optimal results",Resource coordination task,2,C14,en
+1784,"- Applies technical knowledge in practical work scenarios
+- Maintains accurate documentation as per regulatory guidelines",Expert methodology practice,3,C14,en
+1785,"- Coordinates with team members for optimal results
+- Conducts routine assessments following approved methodologies",Guidelines adherence check,4,C14,en
+1786,"- Documents activities using prescribed formats
+- Reviews established procedures and protocols according to organizational standards",Regulatory requirement fulfillment,5,C14,en
+1787,"- Applies technical knowledge in practical work scenarios
+- Documents activities using prescribed formats
+- Manages workflow according to established protocols",Quality assurance measure,1,C15,en
+1788,"- Tracks progress using appropriate tools and methods
+- Demonstrates proficiency in core competency areas",Performance evaluation cycle,2,C15,en
+1789,- Performs quality checks at designated intervals,Service delivery step,3,C15,en
+1790,"- Manages workflow according to established protocols
+- Reviews and updates processes as required",Mastery level performance,4,C15,en
+1791,"- Tracks progress using appropriate tools and methods
+- Evaluates outcomes based on success criteria
+- Provides support services following guidelines",Resource coordination task,5,C15,en
+1792,- Manages workflow according to established protocols,Regulatory requirement fulfillment,1,C16,en
+1793,"- Maintains accurate documentation as per regulatory guidelines
+- Manages workflow according to established protocols
+- Documents activities using prescribed formats",Standard procedure execution,2,C16,en
+1794,- Tracks progress using appropriate tools and methods,Systematic approach implementation,3,C16,en
+1795,"- Reviews established procedures and protocols according to organizational standards
+- Reviews and updates processes as required
+- Tracks progress using appropriate tools and methods",Service delivery step,4,C16,en
+1796,"- Demonstrates proficiency in core competency areas
+- Implements systematic approaches for quality service delivery",Training module completion,5,C16,en
+1797,"- Provides support services following guidelines
+- Applies technical knowledge in practical work scenarios
+- Evaluates outcomes based on success criteria",Procedure accuracy verification,1,C17,en
+1798,"- Monitors processes to ensure compliance with standards
+- Coordinates with team members for optimal results",Performance evaluation cycle,2,C17,en
+1799,"- Monitors processes to ensure compliance with standards
+- Demonstrates proficiency in core competency areas",Training module completion,3,C17,en
+1800,- Follows standardized procedures for task completion,Baseline competency achievement,4,C17,en
+1801,- Applies technical knowledge in practical work scenarios,Resource coordination task,5,C17,en
+1802,"- Implements systematic approaches for quality service delivery
+- Adheres to safety and quality standards consistently
+- Coordinates resources effectively to meet operational requirements",Process improvement stage,1,C18,en
+1803,"- Tracks progress using appropriate tools and methods
+- Follows standardized procedures for task completion
+- Performs quality checks at designated intervals",Intermediate proficiency level,2,C18,en
+1862,"- Coordinates with team members for optimal results
+- Maintains accurate documentation as per regulatory guidelines",Process improvement stage,1,C30,en
+1804,- Adheres to safety and quality standards consistently,Documentation review phase,3,C18,en
+1805,- Monitors processes to ensure compliance with standards,Basic protocol understanding,4,C18,en
+1806,"- Adheres to safety and quality standards consistently
+- Coordinates with team members for optimal results",Regulatory requirement fulfillment,5,C18,en
+1807,"- Tracks progress using appropriate tools and methods
+- Follows standardized procedures for task completion
+- Implements systematic approaches for quality service delivery",Quality verification process,1,C19,en
+1808,"- Conducts routine assessments following approved methodologies
+- Implements systematic approaches for quality service delivery",Quality assurance measure,2,C19,en
+1809,"- Applies technical knowledge in practical work scenarios
+- Reviews and updates processes as required",Best practices application,3,C19,en
+1810,"- Monitors processes to ensure compliance with standards
+- Tracks progress using appropriate tools and methods",Professional competency level,4,C19,en
+1811,- Evaluates outcomes based on success criteria,Service delivery step,5,C19,en
+1812,"- Implements corrective measures when needed
+- Implements systematic approaches for quality service delivery
+- Reviews established procedures and protocols according to organizational standards",Intermediate proficiency level,1,C20,en
+1813,"- Reviews and updates processes as required
+- Demonstrates proficiency in core competency areas
+- Coordinates with team members for optimal results",Standard procedure execution,2,C20,en
+1814,"- Coordinates resources effectively to meet operational requirements
+- Monitors processes to ensure compliance with standards
+- Maintains accurate documentation as per regulatory guidelines",Quality verification process,3,C20,en
+1815,"- Reviews and updates processes as required
+- Reviews established procedures and protocols according to organizational standards",Training module completion,4,C20,en
+1816,"- Coordinates with team members for optimal results
+- Implements corrective measures when needed
+- Reviews established procedures and protocols according to organizational standards",Resource coordination task,5,C20,en
+1817,- Provides support services following guidelines,Service delivery step,1,C21,en
+1818,"- Maintains accurate documentation as per regulatory guidelines
+- Provides support services following guidelines",Systematic approach implementation,2,C21,en
+1819,- Evaluates outcomes based on success criteria,Operational standard review,3,C21,en
+1820,- Reviews established procedures and protocols according to organizational standards,Procedure accuracy verification,4,C21,en
+1821,"- Reviews established procedures and protocols according to organizational standards
+- Manages workflow according to established protocols
+- Tracks progress using appropriate tools and methods",Advanced skill application,5,C21,en
+1822,"- Conducts routine assessments following approved methodologies
+- Maintains accurate documentation as per regulatory guidelines",Performance evaluation cycle,1,C22,en
+1823,"- Evaluates performance metrics against defined benchmarks
+- Reviews and updates processes as required",Professional competency level,2,C22,en
+1824,"- Coordinates with team members for optimal results
+- Tracks progress using appropriate tools and methods
+- Implements systematic approaches for quality service delivery",Standards compliance review,3,C22,en
+1825,"- Reviews established procedures and protocols according to organizational standards
+- Reviews and updates processes as required
+- Provides support services following guidelines",Mastery level performance,4,C22,en
+1826,- Reviews and updates processes as required,Technical skill demonstration,5,C22,en
+1827,"- Coordinates resources effectively to meet operational requirements
+- Monitors processes to ensure compliance with standards",Initial assessment completion,1,C23,en
+1828,"- Adheres to safety and quality standards consistently
+- Monitors processes to ensure compliance with standards
+- Performs quality checks at designated intervals",Resource coordination task,2,C23,en
+1829,"- Coordinates with team members for optimal results
+- Conducts routine assessments following approved methodologies",Routine monitoring activity,3,C23,en
+1830,"- Tracks progress using appropriate tools and methods
+- Coordinates resources effectively to meet operational requirements
+- Reviews established procedures and protocols according to organizational standards",Standards compliance review,4,C23,en
+1831,- Evaluates performance metrics against defined benchmarks,Quality assurance measure,5,C23,en
+1832,"- Provides support services following guidelines
+- Maintains accurate documentation as per regulatory guidelines",Procedure accuracy verification,1,C24,en
+1833,- Coordinates with team members for optimal results,Professional competency level,2,C24,en
+1863,"- Applies technical knowledge in practical work scenarios
+- Provides support services following guidelines",Training module completion,2,C30,en
+1834,- Tracks progress using appropriate tools and methods,Technical skill demonstration,3,C24,en
+1835,"- Coordinates with team members for optimal results
+- Implements corrective measures when needed
+- Tracks progress using appropriate tools and methods",Standards compliance review,4,C24,en
+1836,"- Reviews established procedures and protocols according to organizational standards
+- Follows standardized procedures for task completion",Standard procedure execution,5,C24,en
+1837,- Evaluates performance metrics against defined benchmarks,Quality verification process,1,C25,en
+1838,"- Monitors processes to ensure compliance with standards
+- Provides support services following guidelines",Mastery level performance,2,C25,en
+1839,- Reviews and updates processes as required,Best practices application,3,C25,en
+1840,- Monitors processes to ensure compliance with standards,Routine monitoring activity,4,C25,en
+1841,"- Conducts routine assessments following approved methodologies
+- Tracks progress using appropriate tools and methods
+- Evaluates outcomes based on success criteria",Comprehensive system management,5,C25,en
+1842,- Conducts routine assessments following approved methodologies,Comprehensive system management,1,C26,en
+1843,"- Provides support services following guidelines
+- Performs quality checks at designated intervals",Subject matter expertise,2,C26,en
+1844,- Documents activities using prescribed formats,Operational standard review,3,C26,en
+1845,- Manages workflow according to established protocols,Compliance check procedure,4,C26,en
+1846,- Evaluates outcomes based on success criteria,Expert methodology practice,5,C26,en
+1847,"- Coordinates with team members for optimal results
+- Follows standardized procedures for task completion",Baseline competency achievement,1,C27,en
+1848,"- Adheres to safety and quality standards consistently
+- Reviews established procedures and protocols according to organizational standards",Service delivery step,2,C27,en
+1849,- Demonstrates proficiency in core competency areas,Systematic approach implementation,3,C27,en
+1850,"- Applies technical knowledge in practical work scenarios
+- Evaluates performance metrics against defined benchmarks",Service delivery step,4,C27,en
+1851,- Adheres to safety and quality standards consistently,Quality verification process,5,C27,en
+1852,"- Coordinates with team members for optimal results
+- Conducts routine assessments following approved methodologies
+- Adheres to safety and quality standards consistently",Initial assessment completion,1,C28,en
+1853,"- Implements corrective measures when needed
+- Monitors processes to ensure compliance with standards
+- Documents activities using prescribed formats",Regulatory requirement fulfillment,2,C28,en
+1854,- Coordinates with team members for optimal results,Intermediate proficiency level,3,C28,en
+1855,"- Maintains accurate documentation as per regulatory guidelines
+- Evaluates performance metrics against defined benchmarks
+- Reviews established procedures and protocols according to organizational standards",Basic protocol understanding,4,C28,en
+1856,"- Reviews and updates processes as required
+- Reviews established procedures and protocols according to organizational standards",Operational standard review,5,C28,en
+1857,"- Monitors processes to ensure compliance with standards
+- Reviews established procedures and protocols according to organizational standards
+- Evaluates outcomes based on success criteria",Mastery level performance,1,C29,en
+1858,"- Manages workflow according to established protocols
+- Evaluates outcomes based on success criteria",Documentation review phase,2,C29,en
+1859,"- Applies technical knowledge in practical work scenarios
+- Follows standardized procedures for task completion
+- Performs quality checks at designated intervals",Quality verification process,3,C29,en
+1860,"- Coordinates resources effectively to meet operational requirements
+- Monitors processes to ensure compliance with standards",Advanced capability demonstration,4,C29,en
+1861,"- Monitors processes to ensure compliance with standards
+- Coordinates with team members for optimal results",Baseline competency achievement,5,C29,en
+1864,"- Performs quality checks at designated intervals
+- Evaluates outcomes based on success criteria",Baseline competency achievement,3,C30,en
+1865,"- Monitors processes to ensure compliance with standards
+- Applies technical knowledge in practical work scenarios",Performance evaluation cycle,4,C30,en
+1866,- Reviews and updates processes as required,Standard procedure execution,5,C30,en
+1867,"- Demonstrates proficiency in core competency areas
+- Follows standardized procedures for task completion
+- Conducts routine assessments following approved methodologies",Documentation review phase,1,C31,en
+1868,- Reviews established procedures and protocols according to organizational standards,Basic protocol understanding,2,C31,en
+1869,"- Reviews and updates processes as required
+- Tracks progress using appropriate tools and methods
+- Evaluates performance metrics against defined benchmarks",Routine monitoring activity,3,C31,en
+1870,"- Reviews established procedures and protocols according to organizational standards
+- Implements corrective measures when needed
+- Performs quality checks at designated intervals",Compliance check procedure,4,C31,en
+1871,"- Applies technical knowledge in practical work scenarios
+- Coordinates resources effectively to meet operational requirements",Quality assurance measure,5,C31,en
+1872,"- Implements systematic approaches for quality service delivery
+- Monitors processes to ensure compliance with standards",Standard procedure execution,1,C32,en
+1873,"- Coordinates resources effectively to meet operational requirements
+- Evaluates performance metrics against defined benchmarks
+- Conducts routine assessments following approved methodologies",Quality assurance measure,2,C32,en
+1874,"- Tracks progress using appropriate tools and methods
+- Conducts routine assessments following approved methodologies",Compliance check procedure,3,C32,en
+1875,"- Reviews established procedures and protocols according to organizational standards
+- Manages workflow according to established protocols
+- Follows standardized procedures for task completion",Routine monitoring activity,4,C32,en
+1876,"- Evaluates outcomes based on success criteria
+- Provides support services following guidelines",Advanced capability demonstration,5,C32,en
+1877,"- Documents activities using prescribed formats
+- Performs quality checks at designated intervals",Subject matter expertise,1,C33,en
+1878,"- Conducts routine assessments following approved methodologies
+- Coordinates resources effectively to meet operational requirements
+- Implements systematic approaches for quality service delivery",Performance evaluation cycle,2,C33,en
+1879,- Applies technical knowledge in practical work scenarios,Expert methodology practice,3,C33,en
+1880,"- Demonstrates proficiency in core competency areas
+- Adheres to safety and quality standards consistently
+- Conducts routine assessments following approved methodologies",Process improvement stage,4,C33,en
+1881,- Reviews and updates processes as required,Initial assessment completion,5,C33,en
+1882,"- Follows standardized procedures for task completion
+- Provides support services following guidelines
+- Performs quality checks at designated intervals",Baseline competency achievement,1,C34,en
+1883,- Applies technical knowledge in practical work scenarios,Quality verification process,2,C34,en
+1884,"- Coordinates with team members for optimal results
+- Monitors processes to ensure compliance with standards
+- Implements corrective measures when needed",Mastery level performance,3,C34,en
+1885,"- Coordinates resources effectively to meet operational requirements
+- Provides support services following guidelines
+- Follows standardized procedures for task completion",Procedure accuracy verification,4,C34,en
+1886,- Tracks progress using appropriate tools and methods,Expert methodology practice,5,C34,en
+1887,"- Documents activities using prescribed formats
+- Implements corrective measures when needed",Resource coordination task,1,C35,en
+1888,"- Provides support services following guidelines
+- Monitors processes to ensure compliance with standards
+- Evaluates performance metrics against defined benchmarks",Advanced capability demonstration,2,C35,en
+1889,"- Evaluates performance metrics against defined benchmarks
+- Reviews established procedures and protocols according to organizational standards
+- Demonstrates proficiency in core competency areas",Resource coordination task,3,C35,en
+1890,"- Coordinates with team members for optimal results
+- Demonstrates proficiency in core competency areas",Procedure accuracy verification,4,C35,en
+1891,"- Adheres to safety and quality standards consistently
+- Implements corrective measures when needed",Resource coordination task,5,C35,en
+1892,- Conducts routine assessments following approved methodologies,Quality assurance measure,1,C36,en
+1893,- Evaluates performance metrics against defined benchmarks,Best practices application,2,C36,en
+1894,"- Manages workflow according to established protocols
+- Evaluates outcomes based on success criteria",Professional competency level,3,C36,en
+1895,- Manages workflow according to established protocols,Process improvement stage,4,C36,en
+1896,"- Adheres to safety and quality standards consistently
+- Evaluates performance metrics against defined benchmarks
+- Maintains accurate documentation as per regulatory guidelines",Routine monitoring activity,5,C36,en
+1897,"- Follows standardized procedures for task completion
+- Applies technical knowledge in practical work scenarios",Expert methodology practice,1,C37,en
+1898,"- Applies technical knowledge in practical work scenarios
+- Reviews established procedures and protocols according to organizational standards
+- Performs quality checks at designated intervals",Compliance check procedure,2,C37,en
+1899,"- Adheres to safety and quality standards consistently
+- Evaluates performance metrics against defined benchmarks",Systematic approach implementation,3,C37,en
+1900,"- Reviews established procedures and protocols according to organizational standards
+- Conducts routine assessments following approved methodologies",Routine monitoring activity,4,C37,en
+1901,- Monitors processes to ensure compliance with standards,Expert methodology practice,5,C37,en
+1902,"- Maintains accurate documentation as per regulatory guidelines
+- Provides support services following guidelines
+- Documents activities using prescribed formats",Intermediate proficiency level,1,C38,en
+1903,"- Monitors processes to ensure compliance with standards
+- Adheres to safety and quality standards consistently
+- Maintains accurate documentation as per regulatory guidelines",Initial assessment completion,2,C38,en
+1904,"- Reviews established procedures and protocols according to organizational standards
+- Evaluates outcomes based on success criteria
+- Conducts routine assessments following approved methodologies",Resource coordination task,3,C38,en
+1905,"- Evaluates outcomes based on success criteria
+- Implements systematic approaches for quality service delivery
+- Adheres to safety and quality standards consistently",Guidelines adherence check,4,C38,en
+1906,- Maintains accurate documentation as per regulatory guidelines,Systematic approach implementation,5,C38,en
