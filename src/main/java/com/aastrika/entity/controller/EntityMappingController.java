@@ -4,6 +4,7 @@ import com.aastrika.entity.dto.request.EntityMappingRequestDTO;
 import com.aastrika.entity.dto.request.EntitySearchRequestDTO;
 import com.aastrika.entity.dto.response.AppResponse;
 import com.aastrika.entity.dto.response.EntityMappingResponseDTO;
+import com.aastrika.entity.dto.response.FullHierarchyNodeDTO;
 import com.aastrika.entity.dto.response.HierarchyResponseDTO;
 import com.aastrika.entity.service.impl.EntityMappingServiceImpl;
 import jakarta.validation.Valid;
@@ -36,6 +37,13 @@ public class EntityMappingController {
       @Valid @RequestBody EntitySearchRequestDTO entitySearchRequestDTO) {
     List<HierarchyResponseDTO> result = entityMappingService.getEntityMappingHierarchy(entitySearchRequestDTO);
     return ResponseEntity.ok(AppResponse.success("api.entity.mapping.search", result, HttpStatus.OK));
+  }
+
+  @PostMapping("/hierarchy")
+  public ResponseEntity<AppResponse<FullHierarchyNodeDTO>> getFullHierarchy(
+      @Valid @RequestBody EntitySearchRequestDTO entitySearchRequestDTO) {
+    FullHierarchyNodeDTO result = entityMappingService.getFullHierarchy(entitySearchRequestDTO);
+    return ResponseEntity.ok(AppResponse.success("api.entity.mapping.full-hierarchy", result, HttpStatus.OK));
   }
 
 }

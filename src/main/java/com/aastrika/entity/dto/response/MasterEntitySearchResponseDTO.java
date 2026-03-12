@@ -20,6 +20,7 @@ public class MasterEntitySearchResponseDTO {
   private String entityType;
   private String type;
   private String code;
+  private String area;
   private String name;
   private String description;
   private String status;

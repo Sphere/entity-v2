@@ -33,6 +33,9 @@ public class MasterEntityDocument {
   @Field(type = FieldType.Text)
   private String code;
 
+  @Field(type = FieldType.Text)
+  private String area;
+
   @Field(type = FieldType.Text, analyzer = "standard")
   private String name;
 
