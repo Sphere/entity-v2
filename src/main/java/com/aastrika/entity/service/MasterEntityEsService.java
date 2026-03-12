@@ -13,15 +13,9 @@ public interface MasterEntityEsService {
 
   void saveEntityDetailsInES(List<EntitySheetRow> entitySheetRowList, String entityType);
 
-  List<MasterEntityDocument> fuzzySearchByName(String name);
-
   List<MasterEntityDocument> phraseSearchByName(String name);
 
   List<MasterEntityDocument> fuzzyPhraseSearchByName(String name);
-
-  List<MasterEntityDocument> fuzzySearch(String searchText);
-
-  List<MasterEntityDocument> searchByCode(String code);
 
   AppResponse<EntityResult<MasterEntitySearchResponseDTO>> findEntitiesBySearchParameter(SearchDTO searchDTO);
 }

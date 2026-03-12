@@ -147,11 +147,24 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     log.debug("BFS allCodes: {}", allCodes);
     log.debug("adjacencyMap keys: {}", adjacencyMap.keySet());
 
-    // Batch fetch all entity details for the collected codes
+    // Batch fetch all entity details for the collected codes in preferred language
+    String preferredLanguage = entitySearchRequestDTO.getEntityLanguage();
     Map<String, MasterEntity> entityLookup = masterEntityRepository
-        .findByCodeInAndLanguageCode(new ArrayList<>(allCodes), entitySearchRequestDTO.getEntityLanguage())
+        .findByCodeInAndLanguageCode(new ArrayList<>(allCodes), preferredLanguage)
         .stream()
         .collect(Collectors.toMap(MasterEntity::getCode, e -> e));
+
+    // Fallback to English for any codes missing in preferred language
+    if (!"en".equals(preferredLanguage)) {
+      Set<String> missingCodes = allCodes.stream()
+          .filter(code -> !entityLookup.containsKey(code))
+          .collect(Collectors.toSet());
+      if (!missingCodes.isEmpty()) {
+        masterEntityRepository
+            .findByCodeInAndLanguageCode(new ArrayList<>(missingCodes), "en")
+            .forEach(entity -> entityLookup.put(entity.getCode(), entity));
+      }
+    }
 
     log.debug("entityLookup keys: {}", entityLookup.keySet());
 
