@@ -1,0 +1,985 @@
+{
+	"info": {
+		"_postman_id": "d0938060-9152-46c8-a17d-e8846d6ef88c",
+		"name": "FRAC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24947262"
+	},
+	"item": [
+		{
+			"name": "upload entity",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{frac_bearer_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "entitySheet",
+							"type": "file",
+							"src": "/home/rajendrakishor/astrika/frac_data/role_en_list.csv"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{frac_url}}/upload?language=en&userId=123",
+					"host": [
+						"{{frac_url}}"
+					],
+					"path": [
+						"upload"
+					],
+					"query": [
+						{
+							"key": "language",
+							"value": "en"
+						},
+						{
+							"key": "userId",
+							"value": "123"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "upload entity",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "entitySheet",
+									"type": "file",
+									"src": "/home/rajendrakishor/astrika/frac_data/role_en_list.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{frac_url}}/upload?language=en&userId=123",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"upload"
+							],
+							"query": [
+								{
+									"key": "language",
+									"value": "en"
+								},
+								{
+									"key": "userId",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:03:36 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "X-RateLimit-Limit-hour",
+							"value": "5000"
+						},
+						{
+							"key": "X-RateLimit-Remaining-hour",
+							"value": "4999"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Kong-Upstream-Latency",
+							"value": "26"
+						},
+						{
+							"key": "X-Kong-Proxy-Latency",
+							"value": "13"
+						},
+						{
+							"key": "Via",
+							"value": "kong/0.14.1"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": null,\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T12:33:36.977118199+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"Bad Request\",\n        \"errmsg\": \"Duplicate entry found\"\n    },\n    \"responseCode\": \"Bad Request\",\n    \"result\": [\n        {\n            \"code\": \"R3\",\n            \"languageCode\": \"en\"\n        },\n        {\n            \"code\": \"R4\",\n            \"languageCode\": \"en\"\n        },\n        {\n            \"code\": \"R5\",\n            \"languageCode\": \"en\"\n        },\n        {\n            \"code\": \"R6\",\n            \"languageCode\": \"en\"\n        },\n        {\n            \"code\": \"R7\",\n            \"languageCode\": \"en\"\n        },\n        {\n            \"code\": \"R8\",\n            \"languageCode\": \"en\"\n        },\n        {\n            \"code\": \"R9\",\n            \"languageCode\": \"en\"\n        },\n        {\n            \"code\": \"R1\",\n            \"languageCode\": \"en\"\n        }\n    ]\n}"
+				},
+				{
+					"name": "upload entity",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "entitySheet",
+									"type": "file",
+									"src": "/home/rajendrakishor/astrika/frac_data/competency_hi_list.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{frac_url}}/upload?language=en&userId=123",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"upload"
+							],
+							"query": [
+								{
+									"key": "language",
+									"value": "en"
+								},
+								{
+									"key": "userId",
+									"value": "123"
+								}
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:04:41 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"api.entity.upload\",\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T12:34:41.895300481+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"OK\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"count\": 1,\n        \"entity\": [\n            {\n                \"entityType\": \"Competency\",\n                \"entityCode\": [\n                    \"C1\",\n                    \"C2\",\n                    \"C3\",\n                    \"C4\",\n                    \"C5\",\n                    \"C6\",\n                    \"C7\",\n                    \"C8\",\n                    \"C9\",\n                    \"C10\",\n                    \"C11\",\n                    \"C12\",\n                    \"C13\",\n                    \"C14\",\n                    \"C15\",\n                    \"C16\",\n                    \"C17\",\n                    \"C18\",\n                    \"C19\",\n                    \"C20\",\n                    \"C21\",\n                    \"C22\",\n                    \"C23\",\n                    \"C24\",\n                    \"C25\",\n                    \"C26\",\n                    \"C27\",\n                    \"C28\",\n                    \"C29\",\n                    \"C30\",\n                    \"C31\",\n                    \"C32\",\n                    \"C33\",\n                    \"C34\",\n                    \"C35\",\n                    \"C36\",\n                    \"C37\",\n                    \"C38\"\n                ]\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "entity search",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "User-Agent",
+						"value": "insomnia/12.3.0"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{frac_bearer_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"entityType\": \"Activity\",\n\t\"language\": \"en\",\n\t\"query\": \"Test1\",\n\t\"strict\": \"false\",\n\t\"field\": [\n\t\t\"code\",\n\t\t\"name\"\n\t]\n}\n// {\n//     \"entityType\": \"Activity\",\n//     \"language\": \"en\",\n//     \"query\": \"Conducts\",\n//     \"strict\": \"false\",\n//     \"field\": [\n//         \"code\",\n//         \"name\"\n//     ]\n// }"
+				},
+				"url": {
+					"raw": "{{frac_url}}/search",
+					"host": [
+						"{{frac_url}}"
+					],
+					"path": [
+						"search"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "entity search",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/12.3.0"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entityType\": \"Activity\",\n\t\"language\": \"en\",\n\t\"query\": \"Test1\",\n\t\"strict\": \"false\",\n\t\"field\": [\n\t\t\"code\",\n\t\t\"name\"\n\t]\n}\n// {\n//     \"entityType\": \"Activity\",\n//     \"language\": \"en\",\n//     \"query\": \"Conducts\",\n//     \"strict\": \"false\",\n//     \"field\": [\n//         \"code\",\n//         \"name\"\n//     ]\n// }"
+						},
+						"url": {
+							"raw": "{{frac_url}}/search",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"search"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:03:21 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-RateLimit-Limit-hour",
+							"value": "5000"
+						},
+						{
+							"key": "X-RateLimit-Remaining-hour",
+							"value": "4999"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Kong-Upstream-Latency",
+							"value": "41"
+						},
+						{
+							"key": "X-Kong-Proxy-Latency",
+							"value": "16"
+						},
+						{
+							"key": "Via",
+							"value": "kong/0.14.1"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"api.entity.search\",\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T12:33:21.923516226+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"OK\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"count\": 2,\n        \"entity\": [\n            {\n                \"id\": \"A41_en\",\n                \"entityId\": \"188\",\n                \"entityType\": \"Activity\",\n                \"type\": null,\n                \"code\": \"A41\",\n                \"area\": null,\n                \"name\": \"Collect samples, conduct POC tests and transport samples as per protocols\",\n                \"description\": \"Collect samples, conduct POC tests and transport samples as per protocols\",\n                \"status\": \"Active\",\n                \"languageCode\": \"en\",\n                \"level\": null,\n                \"levelId\": null,\n                \"additionalProperties\": null,\n                \"createdAt\": null,\n                \"updatedAt\": null,\n                \"createdBy\": null,\n                \"updatedBy\": null,\n                \"levels\": []\n            },\n            {\n                \"id\": \"A300_en\",\n                \"entityId\": \"100\",\n                \"entityType\": \"ACTIVITY\",\n                \"type\": null,\n                \"code\": \"A300\",\n                \"area\": null,\n                \"name\": \"Detect pregnancy and calculate Estimated Delivery Date of PW test\",\n                \"description\": \"Detect pregnancy and calculate Estimated Delivery Date of PW\",\n                \"status\": null,\n                \"languageCode\": \"en\",\n                \"level\": null,\n                \"levelId\": null,\n                \"additionalProperties\": null,\n                \"createdAt\": \"2026-03-06T10:20:17.445+00:00\",\n                \"updatedAt\": \"2026-03-06T10:20:29.335+00:00\",\n                \"createdBy\": \"fracuser_n35n\",\n                \"updatedBy\": \"fracuser_n35n\",\n                \"levels\": []\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "update entity",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "User-Agent",
+						"value": "insomnia/12.3.0"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{frac_bearer_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"entityType\": \"Activity\",\n        \"type\": \"test\",\n        \"code\": \"A1\",\n        \"area\": \"test area\",\n        \"name\": \"Test 1 Detect pregnancy and calculate Estimated Delivery Date of PW\",\n        \"description\": \"Test 1 Detect pregnancy and calculate Estimated Delivery Date of PW\",\n        \"status\": \"Active\",\n        \"languageCode\": \"en\"\n    },\n    {\n        \"entityType\": \"Activity\",\n        \"type\": \"test\",\n        \"code\": \"A2\",\n        \"area\": \"test2 area\",\n        \"name\": \"Test2 Conduct Antenatal Assessment of PW and identify High Risk Pregnancy\",\n        \"description\": \"Test 2 Conduct Antenatal Assessment of PW and identify High Risk Pregnancy\",\n        \"status\": \"Deactivated\",\n        \"languageCode\": \"en\"\n    }\n]"
+				},
+				"url": {
+					"raw": "{{frac_url}}/update?userId=345",
+					"host": [
+						"{{frac_url}}"
+					],
+					"path": [
+						"update"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "345"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "update entity",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/12.3.0"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"entityType\": \"Activity\",\n        \"type\": \"test\",\n        \"code\": \"A1\",\n        \"area\": \"test area\",\n        \"name\": \"Test 1 Detect pregnancy and calculate Estimated Delivery Date of PW\",\n        \"description\": \"Test 1 Detect pregnancy and calculate Estimated Delivery Date of PW\",\n        \"status\": \"Active\",\n        \"languageCode\": \"en\"\n    },\n    {\n        \"entityType\": \"Activity\",\n        \"type\": \"test\",\n        \"code\": \"A2\",\n        \"area\": \"test2 area\",\n        \"name\": \"Test2 Conduct Antenatal Assessment of PW and identify High Risk Pregnancy\",\n        \"description\": \"Test 2 Conduct Antenatal Assessment of PW and identify High Risk Pregnancy\",\n        \"status\": \"Deactivated\",\n        \"languageCode\": \"en\"\n    }\n]"
+						},
+						"url": {
+							"raw": "{{frac_url}}/update?userId=345",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"update"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "345"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:06:42 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-RateLimit-Limit-hour",
+							"value": "5000"
+						},
+						{
+							"key": "X-RateLimit-Remaining-hour",
+							"value": "4999"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Kong-Upstream-Latency",
+							"value": "828"
+						},
+						{
+							"key": "X-Kong-Proxy-Latency",
+							"value": "31"
+						},
+						{
+							"key": "Via",
+							"value": "kong/0.14.1"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"api.entity.update\",\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T12:36:42.732245822+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"OK\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"count\": 2,\n        \"entity\": [\n            {\n                \"id\": 2046,\n                \"entityId\": \"100\",\n                \"entityType\": \"ACTIVITY\",\n                \"type\": \"test\",\n                \"area\": \"test area\",\n                \"code\": \"A1\",\n                \"name\": \"Test 1 Detect pregnancy and calculate Estimated Delivery Date of PW\",\n                \"description\": \"Test 1 Detect pregnancy and calculate Estimated Delivery Date of PW\",\n                \"status\": \"Active\",\n                \"languageCode\": \"en\",\n                \"level\": null,\n                \"levelId\": null,\n                \"source\": null,\n                \"additionalProperties\": null,\n                \"createdAt\": \"2026-03-06T06:29:37.606+00:00\",\n                \"updatedAt\": \"2026-03-12T07:06:42.301+00:00\",\n                \"createdBy\": \"fracuser_n35n\",\n                \"updatedBy\": \"345\",\n                \"competencyLevels\": []\n            },\n            {\n                \"id\": 1480,\n                \"entityId\": \"150\",\n                \"entityType\": \"ACTIVITY\",\n                \"type\": \"test\",\n                \"area\": \"test2 area\",\n                \"code\": \"A2\",\n                \"name\": \"Test2 Conduct Antenatal Assessment of PW and identify High Risk Pregnancy\",\n                \"description\": \"Test 2 Conduct Antenatal Assessment of PW and identify High Risk Pregnancy\",\n                \"status\": \"Deactivated\",\n                \"languageCode\": \"en\",\n                \"level\": null,\n                \"levelId\": null,\n                \"source\": null,\n                \"additionalProperties\": null,\n                \"createdAt\": \"2026-03-02T09:10:27.425+00:00\",\n                \"updatedAt\": \"2026-03-12T07:06:42.382+00:00\",\n                \"createdBy\": \"sumitbajaj_98ww\",\n                \"updatedBy\": \"345\",\n                \"competencyLevels\": []\n            }\n        ]\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "entity delete",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{frac_bearer_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"entityCode\": \"c20\",\n        \"entityType\": \"Competency\",\n        \"language\": \"hi\",\n        \"purgeAllLanguage\": false\n        \n    },\n    {\n        \"entityCode\": \"c21\",\n        \"entityType\": \"Competency\",\n        \"language\": \"hi\",\n        \"purgeAllLanguage\": null\n        \n    }\n]\n"
+				},
+				"url": {
+					"raw": "{{frac_url}}/delete",
+					"host": [
+						"{{frac_url}}"
+					],
+					"path": [
+						"delete"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "entity delete",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"entityCode\": \"c20\",\n        \"entityType\": \"Competency\",\n        \"language\": \"hi\",\n        \"purgeAllLanguage\": false\n        \n    },\n    {\n        \"entityCode\": \"c21\",\n        \"entityType\": \"Competency\",\n        \"language\": \"hi\",\n        \"purgeAllLanguage\": null\n        \n    }\n]\n"
+						},
+						"url": {
+							"raw": "{{frac_url}}/delete",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"delete"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:17:39 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-RateLimit-Limit-hour",
+							"value": "5000"
+						},
+						{
+							"key": "X-RateLimit-Remaining-hour",
+							"value": "4999"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Kong-Upstream-Latency",
+							"value": "240"
+						},
+						{
+							"key": "X-Kong-Proxy-Latency",
+							"value": "64"
+						},
+						{
+							"key": "Via",
+							"value": "kong/0.14.1"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"api.entity.delete\",\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T12:47:39.271124569+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"OK\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"count\": 0,\n        \"entity\": []\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "entity mapping",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "User-Agent",
+						"value": "insomnia/12.3.1"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{frac_bearer_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"parentEntityType\": \"Activity\",\n        \"parentEntityCode\": \"P2\",\n        \"childEntityType\": \"Role\",\n        \"childEntityCode\": \"R1\",\n        \"competencies\": []\n    },\n    {\n        \"parentEntityType\": \"Position\",\n        \"parentEntityCode\": \"P2\",\n        \"childEntityType\": \"Role\",\n        \"childEntityCode\": \"R2\",\n        \"competencies\": []\n    }\n]\n\n// [\n//     {\n//         \"parentEntityType\": \"Role\",\n//         \"parentEntityCode\": \"R1\",\n//         \"childEntityType\": \"Activity\",\n//         \"childEntityCode\": \"A1\",\n//         \"competencies\": []\n//     },\n//     {\n//         \"parentEntityType\": \"Role\",\n//         \"parentEntityCode\": \"R1\",\n//         \"childEntityType\": \"Activity\",\n//         \"childEntityCode\": \"A2\",\n//         \"competencies\": []\n//     },\n//     {\n//         \"parentEntityType\": \"Role\",\n//         \"parentEntityCode\": \"R1\",\n//         \"childEntityType\": \"Activity\",\n//         \"childEntityCode\": \"A3\",\n//         \"competencies\": []\n//     }\n// ]\n\n// [\n//     {\n//         \"parentEntityType\": \"Activity\",\n//         \"parentEntityCode\": \"A3\",\n//         \"childEntityType\": \"Competency\",\n//         \"childEntityCode\": \"c25\",\n//         \"competencies\": [1,3,5]\n//     },\n//      {\n//         \"parentEntityType\": \"Activity\",\n//         \"parentEntityCode\": \"A3\",\n//         \"childEntityType\": \"Competency\",\n//         \"childEntityCode\": \"c26\",\n//         \"competencies\": [2,4]\n//     }\n// ]"
+				},
+				"url": {
+					"raw": "{{frac_url}}/mapping",
+					"host": [
+						"{{frac_url}}"
+					],
+					"path": [
+						"mapping"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "wrong mapping",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/12.3.1"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"parentEntityType\": \"Activity\",\n        \"parentEntityCode\": \"P2\",\n        \"childEntityType\": \"Role\",\n        \"childEntityCode\": \"R1\",\n        \"competencies\": []\n    },\n    {\n        \"parentEntityType\": \"Position\",\n        \"parentEntityCode\": \"P2\",\n        \"childEntityType\": \"Role\",\n        \"childEntityCode\": \"R2\",\n        \"competencies\": []\n    }\n]\n"
+						},
+						"url": {
+							"raw": "{{frac_url}}/mapping",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"mapping"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:22:58 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": null,\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T12:52:58.551389375+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"Bad Request\",\n        \"errmsg\": \"Invalid mapping structure: ACTIVITY_ROLE. Allowed combinations: [POSITION_ROLE, ROLE_ACTIVITY, ACTIVITY_COMPETENCY]\"\n    },\n    \"responseCode\": \"Bad Request\",\n    \"result\": null\n}"
+				},
+				{
+					"name": "entity mapping",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "User-Agent",
+								"value": "insomnia/12.3.1"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"parentEntityType\": \"Role\",\n        \"parentEntityCode\": \"R1\",\n        \"childEntityType\": \"Activity\",\n        \"childEntityCode\": \"A1\",\n        \"competencies\": []\n    },\n    {\n        \"parentEntityType\": \"Position\",\n        \"parentEntityCode\": \"P2\",\n        \"childEntityType\": \"Role\",\n        \"childEntityCode\": \"R2\",\n        \"competencies\": []\n    }\n]\n"
+						},
+						"url": {
+							"raw": "{{frac_url}}/mapping",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"mapping"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:23:51 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"api.entity.mapping\",\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T12:53:51.692823198+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"Created\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"Created\",\n    \"result\": [\n        {\n            \"parentEntityType\": \"ROLE\",\n            \"parentEntityCode\": \"R1\",\n            \"childEntityType\": \"ACTIVITY\",\n            \"childEntityCode\": \"A1\",\n            \"competencies\": []\n        },\n        {\n            \"parentEntityType\": \"POSITION\",\n            \"parentEntityCode\": \"P2\",\n            \"childEntityType\": \"ROLE\",\n            \"childEntityCode\": \"R2\",\n            \"competencies\": []\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "mapping search",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{frac_bearer_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"entityType\": \"Activity\",\n    \"entityCode\": \"c1\",\n    \"entityLanguage\": \"en\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{frac_url}}/mapping/search",
+					"host": [
+						"{{frac_url}}"
+					],
+					"path": [
+						"mapping",
+						"search"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "mapping search",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entityType\": \"Activity\",\n    \"entityCode\": \"c1\",\n    \"entityLanguage\": \"en\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{frac_url}}/mapping/search",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"mapping",
+								"search"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:34:58 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-RateLimit-Limit-hour",
+							"value": "5000"
+						},
+						{
+							"key": "X-RateLimit-Remaining-hour",
+							"value": "4995"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Kong-Upstream-Latency",
+							"value": "24"
+						},
+						{
+							"key": "X-Kong-Proxy-Latency",
+							"value": "18"
+						},
+						{
+							"key": "Via",
+							"value": "kong/0.14.1"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"api.entity.mapping.search\",\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T13:04:58.670840295+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"OK\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": [\n        {\n            \"entityType\": \"COMPETENCY\",\n            \"entityCode\": \"C1\",\n            \"entityName\": \"Pregnancy Identification test\",\n            \"language\": \"en\",\n            \"entityDescription\": \"Conducts initial assessment to identify pregnancy, High risk pregnancy and estimate gestational age\",\n            \"childHierarchy\": []\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "full hierarchy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{frac_bearer_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"entityType\": \"Role\",\n    \"entityCode\": \"r1\",\n    \"entityLanguage\": \"hi\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{frac_url}}/hierarchy",
+					"host": [
+						"{{frac_url}}"
+					],
+					"path": [
+						"hierarchy"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "full hierarchy",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{frac_bearer_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entityType\": \"Role\",\n    \"entityCode\": \"r1\",\n    \"entityLanguage\": \"hi\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{frac_url}}/hierarchy",
+							"host": [
+								"{{frac_url}}"
+							],
+							"path": [
+								"hierarchy"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 12 Mar 2026 07:37:32 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-RateLimit-Limit-hour",
+							"value": "5000"
+						},
+						{
+							"key": "X-RateLimit-Remaining-hour",
+							"value": "4999"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Kong-Upstream-Latency",
+							"value": "66"
+						},
+						{
+							"key": "X-Kong-Proxy-Latency",
+							"value": "61"
+						},
+						{
+							"key": "Via",
+							"value": "kong/0.14.1"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"api.entity.mapping.full-hierarchy\",\n    \"ver\": \"v1\",\n    \"ts\": \"2026-03-12T13:07:32.351480806+05:30\",\n    \"params\": {\n        \"resmsgid\": null,\n        \"msgid\": null,\n        \"err\": null,\n        \"status\": \"OK\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"entityType\": \"ROLE\",\n        \"entityCode\": \"R1\",\n        \"entityName\": \"आउटरीच के माध्यम से और स्वास्थ्य केंद्र में एंटीनेटल एवं एंटीपार्टम सेवाएँ प्रदान करना।\",\n        \"entityDescription\": \"आउटरीच के माध्यम से और स्वास्थ्य केंद्र में एंटीनेटल एवं एंटीपार्टम सेवाएँ प्रदान करना।\",\n        \"language\": \"hi\",\n        \"competencies\": null,\n        \"children\": [\n            {\n                \"entityType\": \"ACTIVITY\",\n                \"entityCode\": \"A1\",\n                \"entityName\": \"गर्भावस्था की पहचान करना और गर्भवती महिला की अनुमानित प्रसव तिथि की गणना करना।\",\n                \"entityDescription\": \"गर्भावस्था की पहचान करना और गर्भवती महिला की अनुमानित प्रसव तिथि की गणना करना।\",\n                \"language\": \"hi\",\n                \"competencies\": null,\n                \"children\": [\n                    {\n                        \"entityType\": \"COMPETENCY\",\n                        \"entityCode\": \"C2\",\n                        \"entityName\": \"गर्भवती महिला और उच्च जोखिम गर्भावस्था की जन्म योजना और तैयारी test\",\n                        \"entityDescription\": \"उच्च जोखिम गर्भावस्था सहित गर्भवती महिला की सूक्ष्म-जन्म योजना (जन्म की तैयारी) करना और उसे कार्यान्वित करना\",\n                        \"language\": \"hi\",\n                        \"competencies\": [\n                            {\n                                \"levelNumber\": 1,\n                                \"levelName\": \"गर्भवती मिहला के पंजीकरण के घटकों को समझना\",\n                                \"levelDescription\": \"गर्भवती मिहला के पंजीकरण के घटकों को समझना\"\n                            },\n                            {\n                                \"levelNumber\": 2,\n                                \"levelName\": \"गर्भवती महिला/ उच्च जोखिम गर्भावस्था के लिए शेड्यूल बनाना\",\n                                \"levelDescription\": \"गर्भवती महिला/ उच्च जोखिम गर्भावस्था के लिए शेड्यूल बनाना\"\n                            },\n                            {\n                                \"levelNumber\": 4,\n                                \"levelName\": \"रोगी की समस्याओं को सुलझाना और उसे कम करने की रणनीतियों का मूल्यांकन करना\",\n                                \"levelDescription\": \"रोगी की समस्याओं को सुलझाना और उसे कम करने की रणनीतियों का मूल्यांकन करना\"\n                            },\n                            {\n                                \"levelNumber\": 3,\n                                \"levelName\": \"रेफरल सहयोग प्रदान करना और इमरजेंसी जन्म योजना बनाना 1\",\n                                \"levelDescription\": \"रेफरल सहयोग प्रदान करना और इमरजेंसी जन्म योजना बनाना\"\n                            }\n                        ],\n                        \"children\": null\n                    },\n                    {\n                        \"entityType\": \"COMPETENCY\",\n                        \"entityCode\": \"C9\",\n                        \"entityName\": \"एक्लेम्पसिया\",\n                        \"entityDescription\": \"एक्लम्पसिया को रोकना और प्रबंधित करना\",\n                        \"language\": \"hi\",\n                        \"competencies\": [\n                            {\n                                \"levelNumber\": 1,\n                                \"levelName\": \"एक्लम्पसिया और उसके प्रकार को समझना\",\n                                \"levelDescription\": \"एक्लम्पसिया और उसके प्रकार को समझना\"\n                            }\n                        ],\n                        \"children\": null\n                    },\n                    {\n                        \"entityType\": \"COMPETENCY\",\n                        \"entityCode\": \"C10\",\n                        \"entityName\": \"नवजात की स्थिति व पुनर्जीवन प्रक्रिया (NBR)\",\n                        \"entityDescription\": \"नवजात शिशु का resuscitation करना और resuscitation करने के बाद अवलोकन करते हुए देखभाल करना\",\n                        \"language\": \"hi\",\n                        \"competencies\": [\n                            {\n                                \"levelNumber\": 1,\n                                \"levelName\": \"नवजात शिशु के resuscitation, इसके प्रबंधन और resuscitation के बाद की देखभाल को समझना\",\n                                \"levelDescription\": \"नवजात शिशु के resuscitation, इसके प्रबंधन और resuscitation के बाद की देखभाल को समझना\"\n                            }\n                        ],\n                        \"children\": null\n                    },\n                    {\n                        \"entityType\": \"COMPETENCY\",\n                        \"entityCode\": \"C13\",\n                        \"entityName\": \"जन्म के समय नवजात शिशुओं का कम वज़न\",\n                        \"entityDescription\": \"जन्म के समय कम वजन वाले नवजात शिशुओं की पहचान और प्रबंधन करना\",\n                        \"language\": \"hi\",\n                        \"competencies\": [\n                            {\n                                \"levelNumber\": 1,\n                                \"levelName\": \"वजन करने की तकनीकों और वर्गीकरण की पहचान करना\",\n                                \"levelDescription\": \"वजन करने की तकनीकों और वर्गीकरण की पहचान करना\"\n                            }\n                        ],\n                        \"children\": null\n                    },\n                    null,\n                    {\n                        \"entityType\": \"COMPETENCY\",\n                        \"entityCode\": \"C14\",\n                        \"entityName\": \"कंगारू मदर केयर\",\n                        \"entityDescription\": \"कंगारू मदर केयर (KMC) की सलाह देना\",\n                        \"language\": \"hi\",\n                        \"competencies\": [\n                            {\n                                \"levelNumber\": 2,\n                                \"levelName\": \"केएमसी के पात्रता मानदंडों को समझना\",\n                                \"levelDescription\": \"केएमसी के पात्रता मानदंडों को समझना\"\n                            }\n                        ],\n                        \"children\": null\n                    }\n                ]\n            }\n        ]\n    }\n}"
+				}
+			]
+		}
+	]
+}
