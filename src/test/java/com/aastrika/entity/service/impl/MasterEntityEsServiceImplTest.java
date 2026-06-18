@@ -195,7 +195,7 @@ class MasterEntityEsServiceImplTest {
     when(masterEntityMapper.toDocument(row2)).thenReturn(doc2);
     when(elasticSearchEntityRepository.saveAll(anyList())).thenReturn(List.of(doc1, doc2));
 
-    masterEntityEsService.saveEntityDetailsInES(List.of(row1, row2), "COMPETENCY");
+    masterEntityEsService.saveEntityDetailsInES(List.of(row1, row2), "COMPETENCY", "testUser");
 
     ArgumentCaptor<List<MasterEntityDocument>> captor = ArgumentCaptor.forClass(List.class);
     verify(elasticSearchEntityRepository, times(1)).saveAll(captor.capture());

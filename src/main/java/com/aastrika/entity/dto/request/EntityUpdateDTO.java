@@ -5,9 +5,11 @@ import java.util.Map;
 
 import com.aastrika.entity.enums.EntityType;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +18,14 @@ public class EntityUpdateDTO {
 
   // Identifier (required to find the entity)
   @NotBlank(message = "Entity code must not be blank")
+  @Setter(AccessLevel.NONE)
   private String code;
+
+  // Entity codes are stored in DB in uppercase. Normalizing here prevents lookup failures
+  // when callers send mixed-case codes (e.g. "A1" vs "a1").
+  public void setCode(String code) {
+    this.code = code != null ? code.toUpperCase() : null;
+  }
 
   @NotBlank(message = "Entity language must not be blank")
   private String languageCode;

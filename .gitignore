@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Claude Code — personal tool config (not project rules) ###
+.claude/settings.json
+.claude/settings.local.json
+.claude/hooks.reference.json

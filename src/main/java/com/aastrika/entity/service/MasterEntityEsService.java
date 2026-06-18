@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface MasterEntityEsService {
 
-  void saveEntityDetailsInES(List<EntitySheetRow> entitySheetRowList, String entityType);
+  void saveEntityDetailsInES(List<EntitySheetRow> entitySheetRowList, String entityType, String userId);
 
   List<MasterEntityDocument> phraseSearchByName(String name);
 

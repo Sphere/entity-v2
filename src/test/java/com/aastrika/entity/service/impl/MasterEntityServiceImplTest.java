@@ -102,7 +102,7 @@ class MasterEntityServiceImplTest {
     assertNotNull(result);
     assertEquals(HttpStatus.OK.getReasonPhrase(), result.getResponseCode());
     verify(masterEntityRepository, times(1)).saveAll(anyList());
-    verify(masterEntityEsService, times(1)).saveEntityDetailsInES(rows, "ROLE");
+    verify(masterEntityEsService, times(1)).saveEntityDetailsInES(rows, "ROLE", "admin");
     verify(entityUtil, never()).getCompetencyListByEntity(any(), any());
   }
 

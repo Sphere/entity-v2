@@ -108,7 +108,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
       }
 
       masterEntityRepository.saveAll(masterEntities);
-      masterEntityEsService.saveEntityDetailsInES(entitySheetRows, globalEntityType);
+      masterEntityEsService.saveEntityDetailsInES(entitySheetRows, globalEntityType, userId);
     }
 
     return entityUploadTracker;
