@@ -16,7 +16,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(indexName = "master_entities", writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = "#{@environment.getProperty('opensearch.index.master-entities')}", writeTypeHint = WriteTypeHint.FALSE)
 public class MasterEntityDocument {
 
   @Id private String id;

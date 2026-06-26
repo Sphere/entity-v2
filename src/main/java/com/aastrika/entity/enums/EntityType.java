@@ -8,7 +8,13 @@ public enum EntityType {
   COMPETENCY,
   ROLE,
   ACTIVITY,
-  POSITION;
+  POSITION,
+  ORGANIZATION,
+  STATE,
+  DISTRICT,
+  BLOCK,
+  FACILITY,
+  POSTING_FACILITY;
 
   @JsonValue
   public String getValue() {
@@ -21,7 +27,7 @@ public enum EntityType {
     try {
       return EntityType.valueOf(value.toUpperCase());
     } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException("Invalid entityType: '" + value + "'. Allowed values: COMPETENCY, ROLE, ACTIVITY, POSITION");
+      throw new IllegalArgumentException("Invalid entityType: '" + value + "'. Allowed values: COMPETENCY, ROLE, ACTIVITY, POSITION, ORGANIZATION, DISTRICT, BLOCK, FACILITY, POSTING_FACILITY");
     }
   }
 }
