@@ -3,6 +3,7 @@ package com.aastrika.entity.reader;
 import com.aastrika.entity.common.EntitySheetHeadersConstant;
 import com.aastrika.entity.common.MemoryUtil;
 import com.aastrika.entity.config.EntitySheetProperties;
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.dto.BatchProcessingResult;
 import com.aastrika.entity.dto.EntitySheetRow;
 import com.aastrika.entity.exception.HeaderMissingException;
@@ -147,6 +148,8 @@ public class CsvEntitySheetReader implements EntitySheetReader {
       throw new SheetDataMissingException(
         HttpStatus.BAD_REQUEST, "Invalid entity type - missing or more than one entity type in sheet");
     }
+
+    EntityType.validate(entityType);
 
     if (EntitySheetHeadersConstant.COMPETENCY_TYPE.equalsIgnoreCase(entityType)) {
       if (!headerList.containsAll(entitySheetProperties.getHeaders().getCompetencyLevels())) {

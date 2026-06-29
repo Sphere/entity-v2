@@ -1,6 +1,7 @@
 package com.aastrika.entity.service.impl;
 
- import com.aastrika.entity.document.MasterEntityDocument;
+import com.aastrika.entity.document.MasterEntityDocument;
+import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.dto.EntitySheetRow;
 import com.aastrika.entity.dto.request.SearchDTO;
 import com.aastrika.entity.dto.response.AppResponse;
@@ -70,8 +71,9 @@ public class MasterEntityEsServiceImpl implements MasterEntityEsService {
    */
   @Override
   public AppResponse<EntityResult<MasterEntitySearchResponseDTO>> findEntitiesBySearchParameter(SearchDTO searchDTO) {
+    EntityType.validate(searchDTO.getEntityType());
     QueryBuilder entityTypeFilter = QueryBuilders
-        .matchQuery("entityType", searchDTO.getEntityType().name())
+        .matchQuery("entityType", searchDTO.getEntityType())
         .fuzziness(Fuzziness.AUTO);
 
     boolean hasLanguage = searchDTO.getLanguage() != null && !searchDTO.getLanguage().isBlank();
