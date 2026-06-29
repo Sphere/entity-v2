@@ -28,8 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.opensearch.data.client.orhlc.NativeSearchQuery;
+import org.opensearch.data.core.OpenSearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
@@ -43,7 +43,7 @@ class MasterEntityEsServiceImplTest {
   private MasterEntityMapper masterEntityMapper;
 
   @Mock
-  private ElasticsearchOperations elasticsearchOperations;
+  private OpenSearchOperations openSearchOperations;
 
   @Mock
   private SearchHits<MasterEntityDocument> searchHits;
@@ -80,7 +80,7 @@ class MasterEntityEsServiceImplTest {
 
     when(searchHit.getContent()).thenReturn(expectedDoc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
     when(masterEntityMapper.toSearchResponse(expectedDoc)).thenReturn(responseDTO);
 
@@ -98,8 +98,8 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals("en", result.getEntity().get(0).getLanguageCode())
     );
 
-    verify(elasticsearchOperations, times(1))
-        .search(any(NativeQuery.class), eq(MasterEntityDocument.class));
+    verify(openSearchOperations, times(1))
+        .search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
   }
 
   @Test
@@ -128,7 +128,7 @@ class MasterEntityEsServiceImplTest {
 
     when(searchHit.getContent()).thenReturn(expectedDoc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
     when(masterEntityMapper.toSearchResponse(expectedDoc)).thenReturn(responseDTO);
 
@@ -145,8 +145,8 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals("CS001", result.getEntity().get(0).getCode())
     );
 
-    verify(elasticsearchOperations, times(1))
-        .search(any(NativeQuery.class), eq(MasterEntityDocument.class));
+    verify(openSearchOperations, times(1))
+        .search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
   }
 
   @Test
@@ -161,7 +161,7 @@ class MasterEntityEsServiceImplTest {
     searchDTO.setField(List.of("name"));
 
     when(searchHits.getSearchHits()).thenReturn(List.of());
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
 
     // Act
@@ -176,8 +176,8 @@ class MasterEntityEsServiceImplTest {
         () -> assertTrue(result.getEntity().isEmpty(), "Entity list should be empty")
     );
 
-    verify(elasticsearchOperations, times(1))
-        .search(any(NativeQuery.class), eq(MasterEntityDocument.class));
+    verify(openSearchOperations, times(1))
+        .search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
   }
 
   // ─── saveEntityDetailsInES ───────────────────────────────────────────────────
@@ -218,7 +218,7 @@ class MasterEntityEsServiceImplTest {
 
     when(searchHit.getContent()).thenReturn(doc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
 
     List<MasterEntityDocument> results = masterEntityEsService.phraseSearchByName("Communication Skills");
@@ -229,14 +229,14 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals("C001", results.get(0).getCode()),
         () -> assertEquals("Communication Skills", results.get(0).getName())
     );
-    verify(elasticsearchOperations, times(1)).search(any(NativeQuery.class), eq(MasterEntityDocument.class));
+    verify(openSearchOperations, times(1)).search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
   }
 
   @Test
   @DisplayName("phraseSearchByName - should return empty list when no phrase match found")
   void shouldReturnEmptyListWhenNoPhraseMatch() {
     when(searchHits.getSearchHits()).thenReturn(List.of());
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
 
     List<MasterEntityDocument> results = masterEntityEsService.phraseSearchByName("nonexistent phrase");
@@ -255,7 +255,7 @@ class MasterEntityEsServiceImplTest {
 
     when(searchHit.getContent()).thenReturn(doc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
 
     List<MasterEntityDocument> results = masterEntityEsService.fuzzyPhraseSearchByName("Problm Solvng");
@@ -266,14 +266,14 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals("PS001", results.get(0).getCode()),
         () -> assertEquals("Problem Solving", results.get(0).getName())
     );
-    verify(elasticsearchOperations, times(1)).search(any(NativeQuery.class), eq(MasterEntityDocument.class));
+    verify(openSearchOperations, times(1)).search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
   }
 
   @Test
   @DisplayName("fuzzyPhraseSearchByName - should return empty list when no match found")
   void shouldReturnEmptyListWhenNoFuzzyPhraseMatch() {
     when(searchHits.getSearchHits()).thenReturn(List.of());
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
 
     List<MasterEntityDocument> results = masterEntityEsService.fuzzyPhraseSearchByName("xyzxyz");
@@ -300,7 +300,7 @@ class MasterEntityEsServiceImplTest {
 
     when(searchHit.getContent()).thenReturn(doc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
     when(masterEntityMapper.toSearchResponse(doc)).thenReturn(responseDTO);
 
@@ -313,14 +313,14 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals(1, result.getCount()),
         () -> assertEquals("C001", result.getEntity().get(0).getCode())
     );
-    verify(elasticsearchOperations, times(1)).search(any(NativeQuery.class), eq(MasterEntityDocument.class));
+    verify(openSearchOperations, times(1)).search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
   }
 
   @Test
   @DisplayName("findEntitiesBySearchParameter - should search without language filter when language is blank")
   void shouldSearchWithoutLanguageFilterWhenLanguageIsBlank() {
     SearchDTO searchDTO = new SearchDTO();
-    searchDTO.setEntityType(EntityType.ROLE);
+    searchDTO.setEntityType("ROLE");
     searchDTO.setLanguage("");
     searchDTO.setQuery("developer");
     searchDTO.setStrict(false);
@@ -333,7 +333,7 @@ class MasterEntityEsServiceImplTest {
 
     when(searchHit.getContent()).thenReturn(doc);
     when(searchHits.getSearchHits()).thenReturn(List.of(searchHit));
-    when(elasticsearchOperations.search(any(NativeQuery.class), eq(MasterEntityDocument.class)))
+    when(openSearchOperations.search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class)))
         .thenReturn(searchHits);
     when(masterEntityMapper.toSearchResponse(doc)).thenReturn(responseDTO);
 
@@ -346,6 +346,6 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals(1, result.getCount()),
         () -> assertEquals("R001", result.getEntity().get(0).getCode())
     );
-    verify(elasticsearchOperations, times(1)).search(any(NativeQuery.class), eq(MasterEntityDocument.class));
+    verify(openSearchOperations, times(1)).search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
   }
 }

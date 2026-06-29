@@ -1,6 +1,5 @@
 package com.aastrika.entity.support;
 
-import com.aastrika.entity.enums.EntityType;
 import com.aastrika.entity.model.CompetencyLevel;
 import com.aastrika.entity.model.EntityMap;
 import com.aastrika.entity.model.MasterEntity;
@@ -28,7 +27,7 @@ public class TestDataLoader {
     String code = record.get("code");
     return Map.entry(code, MasterEntity.builder()
         .code(code)
-        .entityType(EntityType.valueOf(record.get("entity_type")))
+        .entityType(record.get("entity_type"))
         .name(record.get("name"))
         .description(record.get("description"))
         .languageCode(record.get("language_code"))
@@ -41,9 +40,9 @@ public class TestDataLoader {
     String competencyList = record.get("competency_list");
     return Map.entry(parentCode + "_" + childCode, EntityMap.builder()
         .parentEntityCode(parentCode)
-        .parentEntityType(EntityType.valueOf(record.get("parent_entity_type")))
+        .parentEntityType(record.get("parent_entity_type"))
         .childEntityCode(childCode)
-        .childEntityType(EntityType.valueOf(record.get("child_entity_type")))
+        .childEntityType(record.get("child_entity_type"))
         .competencyLevelList(competencyList.isBlank() ? null : competencyList)
         .build());
   });
@@ -78,10 +77,10 @@ public class TestDataLoader {
    * Returns CompetencyLevel list for a given child entity code and type,
    * using the level numbers defined in entity_map.csv for that child.
    */
-  public static List<CompetencyLevel> competencyLevels(EntityType childEntityType, String childEntityCode) {
+  public static List<CompetencyLevel> competencyLevels(String childEntityType, String childEntityCode) {
     return ENTITY_MAPS.values().stream()
         .filter(em -> childEntityCode.equals(em.getChildEntityCode())
-            && childEntityType == em.getChildEntityType()
+            && childEntityType.equals(em.getChildEntityType())
             && em.getCompetencyLevelList() != null)
         .flatMap(em -> Arrays.stream(em.getCompetencyLevelList().split(","))
             .map(String::trim)

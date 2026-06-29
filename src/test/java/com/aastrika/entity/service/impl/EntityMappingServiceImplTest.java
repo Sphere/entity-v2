@@ -111,7 +111,7 @@ class EntityMappingServiceImplTest {
   @DisplayName("saveEntityMapping - should throw BAD_REQUEST for invalid type combination")
   void shouldThrowForInvalidTypeCombination() {
     EntityMappingRequestDTO dto = new EntityMappingRequestDTO();
-    dto.setParentEntityType(EntityType.POSITION);
+    dto.setParentEntityType("POSITION");
     dto.setParentEntityCode("P1");
     dto.setChildEntityType(EntityType.COMPETENCY);  // POSITION_COMPETENCY not allowed
     dto.setChildEntityCode("C25");
@@ -127,12 +127,12 @@ class EntityMappingServiceImplTest {
   @DisplayName("saveEntityMapping - should throw NOT_FOUND when parent entity does not exist")
   void shouldThrowWhenParentEntityNotFound() {
     EntityMappingRequestDTO dto = new EntityMappingRequestDTO();
-    dto.setParentEntityType(EntityType.POSITION);
+    dto.setParentEntityType("POSITION");
     dto.setParentEntityCode("P1");
-    dto.setChildEntityType(EntityType.ROLE);
+    dto.setChildEntityType("ROLE");
     dto.setChildEntityCode("R1");
 
-    when(masterEntityRepository.findByCodeAndEntityType("P1", EntityType.POSITION))
+    when(masterEntityRepository.findByCodeAndEntityType("P1", "POSITION"))
         .thenReturn(List.of());
 
     UpdateEntityException ex = assertThrows(UpdateEntityException.class,
@@ -146,14 +146,14 @@ class EntityMappingServiceImplTest {
   @DisplayName("saveEntityMapping - should throw NOT_FOUND when child entity does not exist")
   void shouldThrowWhenChildEntityNotFound() {
     EntityMappingRequestDTO dto = new EntityMappingRequestDTO();
-    dto.setParentEntityType(EntityType.POSITION);
+    dto.setParentEntityType("POSITION");
     dto.setParentEntityCode("P1");
-    dto.setChildEntityType(EntityType.ROLE);
+    dto.setChildEntityType("ROLE");
     dto.setChildEntityCode("R1");
 
-    when(masterEntityRepository.findByCodeAndEntityType("P1", EntityType.POSITION))
+    when(masterEntityRepository.findByCodeAndEntityType("P1", "POSITION"))
         .thenReturn(List.of(P1));
-    when(masterEntityRepository.findByCodeAndEntityType("R1", EntityType.ROLE))
+    when(masterEntityRepository.findByCodeAndEntityType("R1", "ROLE"))
         .thenReturn(List.of());
 
     UpdateEntityException ex = assertThrows(UpdateEntityException.class,
@@ -167,21 +167,21 @@ class EntityMappingServiceImplTest {
   @DisplayName("saveEntityMapping - should delete existing mappings then save new ones")
   void shouldDeleteExistingMappingsAndSaveNew() {
     EntityMappingRequestDTO dto = new EntityMappingRequestDTO();
-    dto.setParentEntityType(EntityType.POSITION);
+    dto.setParentEntityType("POSITION");
     dto.setParentEntityCode("P1");
-    dto.setChildEntityType(EntityType.ROLE);
+    dto.setChildEntityType("ROLE");
     dto.setChildEntityCode("R1");
 
     EntityMap existingMap = EntityMap.builder().id(10).parentEntityCode("P1")
-        .parentEntityType(EntityType.POSITION).childEntityCode("R1")
-        .childEntityType(EntityType.ROLE).build();
+        .parentEntityType("POSITION").childEntityCode("R1")
+        .childEntityType("ROLE").build();
     EntityMap newMap = EntityMap.builder().parentEntityCode("P1")
-        .parentEntityType(EntityType.POSITION).childEntityCode("R1")
-        .childEntityType(EntityType.ROLE).build();
+        .parentEntityType("POSITION").childEntityCode("R1")
+        .childEntityType("ROLE").build();
 
-    when(masterEntityRepository.findByCodeAndEntityType("P1", EntityType.POSITION)).thenReturn(List.of(P1));
-    when(masterEntityRepository.findByCodeAndEntityType("R1", EntityType.ROLE)).thenReturn(List.of(R1));
-    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", EntityType.POSITION))
+    when(masterEntityRepository.findByCodeAndEntityType("P1", "POSITION")).thenReturn(List.of(P1));
+    when(masterEntityRepository.findByCodeAndEntityType("R1", "ROLE")).thenReturn(List.of(R1));
+    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", "POSITION"))
         .thenReturn(List.of(existingMap));
     when(entityMapMapper.toEntity(any(EntityMappingRequestDTO.class))).thenReturn(newMap);
     when(entityMapRepository.saveAll(anyList())).thenReturn(List.of(newMap));
@@ -200,16 +200,16 @@ class EntityMappingServiceImplTest {
   @DisplayName("saveEntityMapping - should save directly without delete when no existing mappings")
   void shouldSaveDirectlyWhenNoExistingMappings() {
     EntityMappingRequestDTO dto = new EntityMappingRequestDTO();
-    dto.setParentEntityType(EntityType.POSITION);
+    dto.setParentEntityType("POSITION");
     dto.setParentEntityCode("P1");
-    dto.setChildEntityType(EntityType.ROLE);
+    dto.setChildEntityType("ROLE");
     dto.setChildEntityCode("R1");
 
     EntityMap newMap = EntityMap.builder().parentEntityCode("P1").childEntityCode("R1").build();
 
-    when(masterEntityRepository.findByCodeAndEntityType("P1", EntityType.POSITION)).thenReturn(List.of(P1));
-    when(masterEntityRepository.findByCodeAndEntityType("R1", EntityType.ROLE)).thenReturn(List.of(R1));
-    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", EntityType.POSITION))
+    when(masterEntityRepository.findByCodeAndEntityType("P1", "POSITION")).thenReturn(List.of(P1));
+    when(masterEntityRepository.findByCodeAndEntityType("R1", "ROLE")).thenReturn(List.of(R1));
+    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", "POSITION"))
         .thenReturn(List.of());
     when(entityMapMapper.toEntity(any(EntityMappingRequestDTO.class))).thenReturn(newMap);
     when(entityMapRepository.saveAll(anyList())).thenReturn(List.of(newMap));
@@ -228,19 +228,19 @@ class EntityMappingServiceImplTest {
   @DisplayName("saveEntityMapping - should set competency level list when child type is COMPETENCY")
   void shouldSetCompetencyLevelListWhenChildIsCompetency() {
     EntityMappingRequestDTO dto = new EntityMappingRequestDTO();
-    dto.setParentEntityType(EntityType.ACTIVITY);
+    dto.setParentEntityType("ACTIVITY");
     dto.setParentEntityCode("A1");
     dto.setChildEntityType(EntityType.COMPETENCY);
     dto.setChildEntityCode("C25");
     dto.setCompetencies(List.of(1, 3, 5));
 
     EntityMap mappedEntityMap = EntityMap.builder().parentEntityCode("A1")
-        .parentEntityType(EntityType.ACTIVITY).childEntityCode("C25")
+        .parentEntityType("ACTIVITY").childEntityCode("C25")
         .childEntityType(EntityType.COMPETENCY).build();
 
-    when(masterEntityRepository.findByCodeAndEntityType("A1", EntityType.ACTIVITY)).thenReturn(List.of(A1));
+    when(masterEntityRepository.findByCodeAndEntityType("A1", "ACTIVITY")).thenReturn(List.of(A1));
     when(masterEntityRepository.findByCodeAndEntityType("C25", EntityType.COMPETENCY)).thenReturn(List.of(C25));
-    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("A1", EntityType.ACTIVITY))
+    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("A1", "ACTIVITY"))
         .thenReturn(List.of());
     when(entityMapMapper.toEntity(any(EntityMappingRequestDTO.class))).thenReturn(mappedEntityMap);
     when(entityMapRepository.saveAll(anyList())).thenReturn(List.of(mappedEntityMap));
@@ -260,7 +260,7 @@ class EntityMappingServiceImplTest {
     givenMocks();
 
     FullHierarchyNodeDTO p1Node = entityMappingService.getFullHierarchy(
-        buildRequest("p1", EntityType.POSITION, "en"));
+        buildRequest("p1", "POSITION", "en"));
 
     // P1
     assertNode(p1Node, P1);
@@ -312,7 +312,7 @@ class EntityMappingServiceImplTest {
         .thenReturn(List.of(A3));
 
     FullHierarchyNodeDTO node = entityMappingService.getFullHierarchy(
-        buildRequest("A3", EntityType.ACTIVITY, "en"));
+        buildRequest("A3", "ACTIVITY", "en"));
 
     assertAll(
         () -> assertNotNull(node),
@@ -326,7 +326,7 @@ class EntityMappingServiceImplTest {
   @DisplayName("getFullHierarchy - should fallback to English for nodes missing in preferred language")
   void shouldFallbackToEnglishForMissingNodesInPreferredLanguage() {
     MasterEntity P1_fr = MasterEntity.builder()
-        .code("P1").entityType(EntityType.POSITION).name("ANM (FR)").languageCode("fr").build();
+        .code("P1").entityType("POSITION").name("ANM (FR)").languageCode("fr").build();
 
     when(entityMapRepository.findByParentEntityCodeIn(argThat(l -> l != null && l.contains("P1"))))
         .thenReturn(List.of(P1_R1, P1_R2));
@@ -340,7 +340,7 @@ class EntityMappingServiceImplTest {
         .thenReturn(List.of(R1, R2));
 
     FullHierarchyNodeDTO p1Node = entityMappingService.getFullHierarchy(
-        buildRequest("P1", EntityType.POSITION, "fr"));
+        buildRequest("P1", "POSITION", "fr"));
 
     assertAll(
         () -> assertNotNull(p1Node),
@@ -359,7 +359,7 @@ class EntityMappingServiceImplTest {
   @Test
   @DisplayName("getEntityMappingHierarchy - should return parent with non-competency children")
   void shouldReturnHierarchyWithNonCompetencyChildren() {
-    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", EntityType.POSITION))
+    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", "POSITION"))
         .thenReturn(List.of(P1_R1, P1_R2));
     when(masterEntityRepository.findByCodeAndLanguageCode("P1", "en"))
         .thenReturn(Optional.of(P1));
@@ -367,13 +367,13 @@ class EntityMappingServiceImplTest {
         .thenReturn(List.of(R1, R2));
 
     List<HierarchyResponseDTO> result = entityMappingService.getEntityMappingHierarchy(
-        buildRequest("P1", EntityType.POSITION, "en"));
+        buildRequest("P1", "POSITION", "en"));
 
     assertAll(
         () -> assertNotNull(result),
         () -> assertEquals(1, result.size()),
         () -> assertEquals("P1", result.get(0).getEntityCode()),
-        () -> assertEquals(EntityType.POSITION.name(), result.get(0).getEntityType()),
+        () -> assertEquals("POSITION", result.get(0).getEntityType()),
         () -> assertEquals(2, result.get(0).getChildHierarchy().size())
     );
 
@@ -381,7 +381,7 @@ class EntityMappingServiceImplTest {
     EntityChildHierarchyDTO child2 = result.get(0).getChildHierarchy().get(1);
     assertAll(
         () -> assertEquals("R1", child1.getEntityCode()),
-        () -> assertEquals(EntityType.ROLE.name(), child1.getEntityType()),
+        () -> assertEquals("ROLE", child1.getEntityType()),
         () -> assertNull(child1.getCompetencies(), "Non-competency child should have no competencies"),
         () -> assertEquals("R2", child2.getEntityCode())
     );
@@ -392,7 +392,7 @@ class EntityMappingServiceImplTest {
   void shouldReturnHierarchyWithCompetencyChildren() {
     C25.setCompetencyLevels(c25Levels);
 
-    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("A1", EntityType.ACTIVITY))
+    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("A1", "ACTIVITY"))
         .thenReturn(List.of(A1_C25));
     when(masterEntityRepository.findByCodeAndLanguageCode("A1", "en"))
         .thenReturn(Optional.of(A1));
@@ -402,7 +402,7 @@ class EntityMappingServiceImplTest {
         .thenReturn(c25LevelDTOs);
 
     List<HierarchyResponseDTO> result = entityMappingService.getEntityMappingHierarchy(
-        buildRequest("A1", EntityType.ACTIVITY, "en"));
+        buildRequest("A1", "ACTIVITY", "en"));
 
     assertNotNull(result);
     assertEquals(1, result.size());
@@ -414,7 +414,7 @@ class EntityMappingServiceImplTest {
     EntityChildHierarchyDTO competencyChild = hierarchy.getChildHierarchy().get(0);
     assertAll(
         () -> assertEquals("C25", competencyChild.getEntityCode()),
-        () -> assertEquals(EntityType.COMPETENCY.name(), competencyChild.getEntityType()),
+        () -> assertEquals(EntityType.COMPETENCY, competencyChild.getEntityType()),
         () -> assertNotNull(competencyChild.getCompetencies()),
         () -> assertEquals(c25LevelDTOs.size(), competencyChild.getCompetencies().size())
     );
@@ -423,14 +423,14 @@ class EntityMappingServiceImplTest {
   @Test
   @DisplayName("getEntityMappingHierarchy - should throw BAD_REQUEST when parent entity not found")
   void shouldThrowWhenParentEntityNotFoundInHierarchy() {
-    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", EntityType.POSITION))
+    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", "POSITION"))
         .thenReturn(List.of(P1_R1));
     when(masterEntityRepository.findByCodeAndLanguageCode("P1", "en"))
         .thenReturn(Optional.empty());
 
     MissingMappingDataException ex = assertThrows(MissingMappingDataException.class,
         () -> entityMappingService.getEntityMappingHierarchy(
-            buildRequest("P1", EntityType.POSITION, "en")));
+            buildRequest("P1", "POSITION", "en")));
 
     assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     verify(masterEntityRepository, never()).findByCodeInAndLanguageCode(anyList(), any());
@@ -439,7 +439,7 @@ class EntityMappingServiceImplTest {
   @Test
   @DisplayName("getEntityMappingHierarchy - should return empty child hierarchy when no mappings exist")
   void shouldReturnEmptyChildHierarchyWhenNoMappings() {
-    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", EntityType.POSITION))
+    when(entityMapRepository.findByParentEntityCodeAndParentEntityType("P1", "POSITION"))
         .thenReturn(List.of());
     when(masterEntityRepository.findByCodeAndLanguageCode("P1", "en"))
         .thenReturn(Optional.of(P1));
@@ -447,7 +447,7 @@ class EntityMappingServiceImplTest {
         .thenReturn(List.of());
 
     List<HierarchyResponseDTO> result = entityMappingService.getEntityMappingHierarchy(
-        buildRequest("P1", EntityType.POSITION, "en"));
+        buildRequest("P1", "POSITION", "en"));
 
     assertAll(
         () -> assertNotNull(result),
@@ -483,7 +483,7 @@ class EntityMappingServiceImplTest {
   private void assertNode(FullHierarchyNodeDTO node, MasterEntity expected) {
     assertNotNull(node);
     assertEquals(expected.getCode(), node.getEntityCode());
-    assertEquals(expected.getEntityType().name(), node.getEntityType());
+    assertEquals(expected.getEntityType(), node.getEntityType());
     assertEquals(expected.getName(), node.getEntityName());
     assertEquals(expected.getLanguageCode(), node.getLanguage());
   }
@@ -510,7 +510,7 @@ class EntityMappingServiceImplTest {
 
   // ─── Other helpers ───────────────────────────────────────────────────────────
 
-  private static EntitySearchRequestDTO buildRequest(String code, EntityType type, String language) {
+  private static EntitySearchRequestDTO buildRequest(String code, String type, String language) {
     EntitySearchRequestDTO request = new EntitySearchRequestDTO();
     request.setEntityCode(code);
     request.setEntityType(type);
