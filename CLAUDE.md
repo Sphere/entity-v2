@@ -43,7 +43,7 @@ com.aastrika.entity
 ├── dto/
 │   ├── request/     # Inbound DTOs
 │   └── response/    # Outbound DTOs
-├── enums/           # EntityType and other enums
+├── enums/           # EntityType (dynamic utility class, not a Java enum) and other types
 ├── exception/       # Custom runtime exceptions extending ApiRuntimeException
 ├── mapper/          # MapStruct interfaces only
 ├── model/           # JPA entities
@@ -103,14 +103,25 @@ com.aastrika.entity
 - For `json` / `jsonb` columns use `@JdbcTypeCode(SqlTypes.JSON)` with `@Column(columnDefinition = "json")` — this is the Hibernate 6 approach and works correctly with PostgreSQL
 - Do not use `AttributeConverter<Map, String>` for json columns — causes `column is of type json but expression is of type character varying`
 
+### EntityType
+- `EntityType` is a `final class`, NOT a Java enum — it has no `valueOf()`, no `name()`, no `ordinal()`
+- Valid types are loaded at startup from `entity.entityTypeList` (application.properties) via `EntityStartupApplicationRunner` which calls `EntityType.load()`
+- Only `EntityType.COMPETENCY = "COMPETENCY"` is a compile-time constant — use it where needed
+- For all other types (`ROLE`, `POSITION`, `ACTIVITY`, etc.) use plain string literals — never assume a constant exists
+- Use `EntityType.validate(String)` to guard user-supplied values at service boundaries
+- In tests: use string literals (`"ROLE"`, `"POSITION"`) not `EntityType.ROLE` — those constants do not exist
+
 ### OpenSearch
 - All OpenSearch operations go through `MasterEntityEsService` — controllers must not call OpenSearch repositories directly
 - Document ID format: `<code>_<languageCode>`
 - Keep search logic in `MasterEntityEsServiceImpl` — it is the single point for OpenSearch interaction
+- `saveEntityDetailsInES(List<EntitySheetRow>, String entityType, String userId)` — always pass `userId`; the impl sets `createdAt` (current timestamp) and `createdBy` (userId) on each document
 
 ### Properties Binding
 - Sheet column config lives under `entity-sheet.*` prefix — bound via `EntitySheetProperties` (`@ConfigurationProperties`)
 - Do not hardcode sheet header names in business logic — always reference `EntitySheetHeadersConstant`
+- `entity.entityTypeList` — comma-separated list of valid entity types loaded at startup; adding a new entity type requires updating this property
+- `entity-map.allowed-type-combinations` — comma-separated parent_child pairs that control which hierarchy mappings are permitted; currently: `ORGANIZATION_POSITION, POSITION_ROLE, ROLE_ACTIVITY, ACTIVITY_COMPETENCY, STATE_DISTRICT, DISTRICT_BLOCK, BLOCK_FACILITY, FACILITY_POSTING_FACILITY, BLOCK_POSTING_FACILITY`
 
 ### Do NOT
 - Do not use `javax.*` imports — the codebase is on `jakarta.*`
@@ -121,19 +132,36 @@ com.aastrika.entity
 
 ---
 
-## Pending Work (as of 2026-06-16)
+## Pending Work (as of 2026-07-02)
 
 | Item | Status | Notes |
 |---|---|---|
 | `additional_properties` DB column drop | Pending | Column still exists in `master_entities` table — run `ALTER TABLE master_entities DROP COLUMN IF EXISTS additional_properties;` |
-| `ElasticsearchConfig.java` rewrite | Pending | Still uses `@EnableElasticsearchRepositories` from the old ES dependency — needs to be replaced with the OpenSearch equivalent config |
-| `additional_properties` field in `MasterEntity` | Under review | Field still present in model (`MasterEntity.java:98`) with `@JdbcTypeCode(SqlTypes.JSON)` — confirm with team whether to keep or remove |
+| `ElasticsearchConfig.java` rewrite | Pending | Still uses `@EnableElasticsearchRepositories` from spring-data-elasticsearch — inconsistent with OpenSearch migration; needs replacement with OpenSearch-native config |
+| `additional_properties` field in `MasterEntity` | Under review | Field still present in model (`MasterEntity.java`) with `@JdbcTypeCode(SqlTypes.JSON)` — confirm with team whether to keep or remove |
 
 ---
 
 ## Release Notes
 
-### [Current] — 2026-06-16
+### [Current] — 2026-07-02
+
+#### Completed
+- `spring-data-opensearch-starter` upgraded `1.5.3 → 1.6.0` — fixes `NoSuchMethodError` (`SearchDocumentResponse` constructor mismatch) caused by Spring Boot 3.4.2 pulling `spring-data-elasticsearch 5.4.x`
+- `EntityType` refactored from Java enum to `final class` with runtime-loaded type set; types driven by `entity.entityTypeList` property loaded at startup via `EntityStartupApplicationRunner`
+- `saveEntityDetailsInES` signature updated to include `userId` (3rd param) — sets `createdBy` and `createdAt` on each OpenSearch document
+- `entity-map.allowed-type-combinations` expanded to 9 combinations covering the full hierarchy: ORGANIZATION → POSITION → ROLE → ACTIVITY → COMPETENCY and STATE → DISTRICT → BLOCK → FACILITY/POSTING_FACILITY
+- Test suite fixed for `EntityType` enum→class refactor: removed `valueOf()` calls, replaced enum constants with string literals, fixed `any(EntityType.class)` matchers
+- Test suite fixed for OpenSearch mock alignment: `ElasticsearchOperations`/`NativeQuery` replaced with `OpenSearchOperations`/`NativeSearchQuery` in `MasterEntityEsServiceImplTest`
+
+#### Known Issues
+- `ElasticsearchConfig.java` still uses `@EnableElasticsearchRepositories` — inconsistent with OpenSearch migration, needs update
+- `additional_properties` DB column not yet dropped from `master_entities`
+- `additional_properties` field still present in `MasterEntity` model — pending team decision
+
+---
+
+### [Historical] — 2026-06-16
 
 #### Completed
 - OpenSearch migration done: replaced `spring-boot-starter-data-elasticsearch` with `spring-data-opensearch-starter 1.6.0`

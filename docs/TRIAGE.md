@@ -229,7 +229,7 @@ message = "A data conflict occurred. Please check your input and try again.";
 |---|---|---|---|---|
 | T-001 | Patch Tomcat CVEs | DevOps / Backend | Immediate | ✅ Completed 2026-06-16 |
 | T-002 | Confirm ES server / migrate to OpenSearch | Infra | Immediate | ✅ Completed 2026-06-16 |
-| T-003 | Change `ddl-auto` default to `validate` | Backend | Before next deploy | Open |
+| T-003 | Change `ddl-auto` default to `validate` | Backend | Before next deploy | ✅ Completed 2026-06-29 |
 | T-004 | Delete `JsonMapConverter.java` | Backend | This sprint | ✅ Completed 2026-06-16 |
 | T-005 | Drop `additional_properties` DB column | Backend / DBA | This sprint | Open |
 | T-006 | Clean up commented code in readers | Backend | This sprint | Open |
