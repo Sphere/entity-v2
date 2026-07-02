@@ -1,8 +1,6 @@
 package com.aastrika.entity.dto.request;
 
-import com.aastrika.entity.enums.EntityType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,8 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EntitySearchRequestDTO {
-  @NotNull(message = "Entity type must not be blank")
-  private EntityType entityType;
+  @NotBlank(message = "Entity type must not be blank")
+  private String entityType;
 
   @NotBlank(message = "Entity code must not be blank")
   @Setter(AccessLevel.NONE)

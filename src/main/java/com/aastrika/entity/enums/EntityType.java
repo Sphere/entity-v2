@@ -1,27 +1,33 @@
 package com.aastrika.entity.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public enum EntityType {
+public final class EntityType {
 
-  COMPETENCY,
-  ROLE,
-  ACTIVITY,
-  POSITION;
+  public static final String COMPETENCY = "COMPETENCY";
 
-  @JsonValue
-  public String getValue() {
-    return this.name();
+  private static final Set<String> TYPES = new HashSet<>();
+
+  private EntityType() {}
+
+  public static void load(List<String> types) {
+    types.forEach(t -> TYPES.add(t.toUpperCase()));
   }
 
-  @JsonCreator
-  public static EntityType fromValue(String value) {
-    if (value == null) return null;
-    try {
-      return EntityType.valueOf(value.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException("Invalid entityType: '" + value + "'. Allowed values: COMPETENCY, ROLE, ACTIVITY, POSITION");
+  public static void validate(String value) {
+    if (value == null || !TYPES.contains(value.toUpperCase())) {
+      throw new IllegalArgumentException(
+          "Invalid entityType: '" + value + "'. Allowed values: " + TYPES);
     }
+  }
+
+  public static boolean isValid(String value) {
+    return value != null && TYPES.contains(value.toUpperCase());
+  }
+
+  public static Set<String> getTypes() {
+    return Set.copyOf(TYPES);
   }
 }

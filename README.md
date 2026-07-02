@@ -1,6 +1,6 @@
 # Aastrika Entity Service
 
-A Spring Boot microservice for managing master data — **Positions, Roles, Activities, Competencies and its levels** — with support for multi-language content, hierarchical mappings, and full-text search via Elasticsearch.
+A Spring Boot microservice for managing master data — **Positions, Roles, Activities, Competencies and its levels** — with support for multi-language content, hierarchical mappings, and full-text search via OpenSearch.
 
 ---
 
@@ -11,18 +11,19 @@ A Spring Boot microservice for managing master data — **Positions, Roles, Acti
 - [Entity Types](#entity-types)
 - [Architecture](#architecture)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Configuration](#configuration)
-  - [Run Locally](#run-locally)
-  - [Docker](#docker)
+    - [Prerequisites](#prerequisites)
+    - [Configuration](#configuration)
+    - [Run Locally](#run-locally)
+    - [Docker](#docker)
 - [API Reference](#api-reference)
-  - [Entity Management](#entity-management)
-  - [Entity Mapping & Hierarchy](#entity-mapping--hierarchy)
+    - [Entity Management](#entity-management)
+    - [Entity Mapping & Hierarchy](#entity-mapping--hierarchy)
 - [Behaviour Notes](#behaviour-notes)
-  - [Hierarchy Language Fallback](#hierarchy-language-fallback)
-  - [Entity Delete and Multi-Language Variants](#entity-delete-and-multi-language-variants)
+    - [Hierarchy Language Fallback](#hierarchy-language-fallback)
+    - [Entity Delete and Multi-Language Variants](#entity-delete-and-multi-language-variants)
 - [Data Upload Format](#data-upload-format)
 - [Running Tests](#running-tests)
+- [Contributing](#contributing)
 
 ---
 
@@ -33,7 +34,7 @@ The Aastrika Entity Service provides a REST API to:
 - **Create, update, and delete** master entities (Competencies, Roles, Activities, Positions)
 - **Upload** entities in bulk via CSV or XLSX files (currently CSV only — XLSX support planned for the next version)
 - **Map entities** in a parent-child hierarchy (Position → Role → Activity → Competency)
-- **Search entities** using fuzzy/exact search powered by Elasticsearch
+- **Search entities** using fuzzy/exact search powered by OpenSearch
 - **Support multiple languages** — each entity can exist in multiple language variants identified by a language code
 
 ---
@@ -45,8 +46,8 @@ The Aastrika Entity Service provides a REST API to:
 | Language       | Java 21                           |
 | Framework      | Spring Boot 3.4.2                 |
 | Database       | PostgreSQL                        |
-| Search         | Elasticsearch 8.13.x              |
-| ORM            | Spring Data JPA / Hibernate       |
+| Search         | OpenSearch (spring-data-opensearch-starter 1.6.0) |
+| ORM            | Spring Data JPA / Hibernate 6     |
 | Mapping        | MapStruct 1.6.3                   |
 | File Parsing   | Apache POI (XLSX), Apache Commons CSV |
 | API Docs       | SpringDoc OpenAPI (Swagger UI)    |
@@ -84,9 +85,9 @@ src/main/java/com/aastrika/entity/
 ├── service/           # Service interfaces and implementations
 ├── repository/
 │   ├── jpa/           # PostgreSQL repositories
-│   └── es/            # Elasticsearch repositories
+│   └── es/            # OpenSearch repositories
 ├── model/             # JPA entities (MasterEntity, EntityMap, CompetencyLevel)
-├── document/          # Elasticsearch documents
+├── document/          # OpenSearch documents
 ├── dto/               # Request/Response DTOs
 ├── mapper/            # MapStruct mappers
 ├── reader/            # CSV and XLSX sheet readers
@@ -103,22 +104,23 @@ src/main/java/com/aastrika/entity/
 
 - Java 21+
 - Maven 3.8+
-- PostgreSQL (default: `localhost:5433`, database: `aastrika_entity`)
-- Elasticsearch 8.13.x (default: `http://localhost:9207`)
+- PostgreSQL (default: `localhost:5433`, database: `aastrika_entity_es7`)
+- OpenSearch (default: `http://localhost:9200`)
 
 ### Configuration
 
 All configuration is in `src/main/resources/application.properties`. Key properties can be overridden via environment variables:
 
-| Environment Variable          | Default                                      | Description                     |
-|-------------------------------|----------------------------------------------|---------------------------------|
-| `DATABASE_URL`                | `jdbc:postgresql://localhost:5433/aastrika_entity` | PostgreSQL JDBC URL        |
-| `DATABASE_USERNAME`           | `postgres`                                   | PostgreSQL username              |
-| `DATABASE_PASSWORD`           | `postgres`                                   | PostgreSQL password              |
-| `ELASTICSEARCH_URIS`          | `http://localhost:9207`                      | Elasticsearch URI                |
-| `ELASTICSEARCH_USERNAME`      | _(empty)_                                    | Elasticsearch username           |
-| `ELASTICSEARCH_PASSWORD`      | _(empty)_                                    | Elasticsearch password           |
-| `JPA_DDL_AUTO`                | `update`                                     | Hibernate DDL strategy           |
+| Environment Variable          | Default                                           | Description                     |
+|-------------------------------|---------------------------------------------------|---------------------------------|
+| `DATABASE_URL`                | `jdbc:postgresql://localhost:5433/aastrika_entity_es7` | PostgreSQL JDBC URL        |
+| `DATABASE_USERNAME`           | `postgres`                                        | PostgreSQL username              |
+| `DATABASE_PASSWORD`           | `postgres`                                        | PostgreSQL password              |
+| `OPENSEARCH_URIS`             | `http://localhost:9200`                           | OpenSearch URI                   |
+| `OPENSEARCH_USERNAME`         | _(empty)_                                         | OpenSearch username              |
+| `OPENSEARCH_PASSWORD`         | _(empty)_                                         | OpenSearch password              |
+| `JPA_DDL_AUTO`                | `update` ⚠ set to `validate` in non-local envs   | Hibernate DDL strategy           |
+| `OPENSEARCH_LOG_LEVEL`        | `WARN`                                            | OpenSearch client log level      |
 
 The service runs on **port 8082** by default.
 
@@ -154,7 +156,7 @@ docker run -p 8082:8082 \
   -e DATABASE_URL=jdbc:postgresql://<host>:5432/aastrika_entity \
   -e DATABASE_USERNAME=postgres \
   -e DATABASE_PASSWORD=postgres \
-  -e ELASTICSEARCH_URIS=http://<host>:9200 \
+  -e OPENSEARCH_URIS=http://<host>:9200 \
   aastrika/entity:latest
 ```
 
@@ -163,6 +165,8 @@ docker run -p 8082:8082 \
 ## API Reference
 
 Swagger UI is available at: `http://localhost:8082/swagger-ui/index.html`
+
+A ready-to-import Postman collection covering all endpoints is available at [`postman_collection.json`](postman_collection.json).
 
 ### Entity Management
 
@@ -384,3 +388,9 @@ Test data files are located in `src/test/resources/test_data/`:
 - `master_entities.csv` — sample master entity data
 - `entity_map.csv` — sample entity mapping data
 - `competency_level.csv` — sample competency level data
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the developer guide — development setup, scripts reference (`check-triage.sh`, `update-release-notes.sh`), release process, and commit guidelines.

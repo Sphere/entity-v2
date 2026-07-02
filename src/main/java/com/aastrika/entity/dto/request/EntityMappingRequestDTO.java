@@ -1,8 +1,6 @@
 package com.aastrika.entity.dto.request;
 
-import com.aastrika.entity.enums.EntityType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,15 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EntityMappingRequestDTO {
-  @NotNull(message = "parent entity type must not be blank")
-  private EntityType parentEntityType;
+  @NotBlank(message = "parent entity type must not be blank")
+  private String parentEntityType;
 
   @NotBlank(message = "parent entity code must not be blank")
   @Setter(AccessLevel.NONE)
   private String parentEntityCode;
 
-  @NotNull(message = "child entity type must not be blank")
-  private EntityType childEntityType;
+  @NotBlank(message = "child entity type must not be blank")
+  private String childEntityType;
 
   @NotBlank(message = "child entity code must not be blank")
   @Setter(AccessLevel.NONE)

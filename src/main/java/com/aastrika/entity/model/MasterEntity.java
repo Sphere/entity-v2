@@ -1,11 +1,8 @@
 package com.aastrika.entity.model;
 
-import com.aastrika.entity.enums.EntityType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,9 +38,8 @@ public class MasterEntity {
   @Column(name = "entity_id", length = 50)
   private String entityId;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "entity_type", length = 100)
-  private EntityType entityType;
+  private String entityType;
 
   @Column(length = 100)
   private String type;

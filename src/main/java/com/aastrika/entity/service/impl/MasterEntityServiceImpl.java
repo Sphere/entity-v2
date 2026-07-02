@@ -96,7 +96,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
         MasterEntity masterEntity = masterEntityMapper.toEntity(entitySheetRow);
         masterEntity.setCreatedBy(userId);
 
-        if (EntityType.COMPETENCY.name().equalsIgnoreCase(globalEntityType)) {
+        if (EntityType.COMPETENCY.equalsIgnoreCase(globalEntityType)) {
           List<CompetencyLevel> competencyLevels = entityUtil.getCompetencyListByEntity(entitySheetRow, masterEntity);
           masterEntity.setCompetencyLevels(competencyLevels);
         }
@@ -108,7 +108,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
       }
 
       masterEntityRepository.saveAll(masterEntities);
-      masterEntityEsService.saveEntityDetailsInES(entitySheetRows, globalEntityType);
+      masterEntityEsService.saveEntityDetailsInES(entitySheetRows, globalEntityType, userId);
     }
 
     return entityUploadTracker;
@@ -149,11 +149,13 @@ public class MasterEntityServiceImpl implements MasterEntityService {
           + " and language: " + entityCreateRequestDTO.getLanguageCode());
     });
 
+    EntityType.validate(entityCreateRequestDTO.getEntityType());
+
     MasterEntity masterEntity = masterEntityMapper.toEntity(entityCreateRequestDTO);
     masterEntity.setCreatedAt(new Date());
     masterEntity.setCreatedBy(userId);
 
-    if (EntityType.COMPETENCY == entityCreateRequestDTO.getEntityType()) {
+    if (EntityType.COMPETENCY.equalsIgnoreCase(entityCreateRequestDTO.getEntityType())) {
       populateCompetencyInMasterEntity(masterEntity, entityCreateRequestDTO);
     }
 
@@ -219,6 +221,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
       existingMasterEntity.setEntityId(updateDTO.getEntityId());
     }
     if (updateDTO.getEntityType() != null) {
+      EntityType.validate(updateDTO.getEntityType());
       existingMasterEntity.setEntityType(updateDTO.getEntityType());
     }
     if (updateDTO.getType() != null) {
@@ -249,7 +252,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
       existingMasterEntity.setAdditionalProperties(updateDTO.getAdditionalProperties());
     }
 
-    if (updateDTO.getCompetencyLevels() != null && EntityType.COMPETENCY == updateDTO.getEntityType()) {
+    if (updateDTO.getCompetencyLevels() != null && EntityType.COMPETENCY.equalsIgnoreCase(updateDTO.getEntityType())) {
       updateCompetencyLevel(existingMasterEntity, updateDTO);
     }
 
@@ -293,6 +296,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     validateLanguageOrPurge(deleteRequestDTOList);
 
     for (EntityDeleteRequestDTO request : deleteRequestDTOList) {
+      EntityType.validate(request.getEntityType());
       if (Boolean.TRUE.equals(request.getPurgeAllLanguage())) {
         List<MasterEntity> masterEntityAllVariants = masterEntityRepository.findByCodeAndEntityType(request.getEntityCode(), request.getEntityType());
 
@@ -356,7 +360,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     MasterEntityDocument document = MasterEntityDocument.builder()
         .id(esDocId)
         .entityId(entity.getEntityId())
-        .entityType(entity.getEntityType() != null ? entity.getEntityType().name() : null)
+        .entityType(entity.getEntityType())
         .type(entity.getType())
         .area(entity.getArea())
         .code(entity.getCode())

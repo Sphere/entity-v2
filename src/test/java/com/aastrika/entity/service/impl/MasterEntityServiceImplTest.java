@@ -86,7 +86,7 @@ class MasterEntityServiceImplTest {
     EntitySheetRow row = EntitySheetRow.builder()
         .code("R001").language("en").entityType("ROLE").name("Developer").build();
     MasterEntity mappedEntity = MasterEntity.builder()
-        .code("R001").languageCode("en").entityType(EntityType.ROLE).name("Developer").build();
+        .code("R001").languageCode("en").entityType("ROLE").name("Developer").build();
     List<EntitySheetRow> rows = List.of(row);
     Map<String, List<EntitySheetRow>> sheetMap = Map.of("ROLE", rows);
 
@@ -102,7 +102,7 @@ class MasterEntityServiceImplTest {
     assertNotNull(result);
     assertEquals(HttpStatus.OK.getReasonPhrase(), result.getResponseCode());
     verify(masterEntityRepository, times(1)).saveAll(anyList());
-    verify(masterEntityEsService, times(1)).saveEntityDetailsInES(rows, "ROLE");
+    verify(masterEntityEsService, times(1)).saveEntityDetailsInES(rows, "ROLE", "admin");
     verify(entityUtil, never()).getCompetencyListByEntity(any(), any());
   }
 
@@ -143,14 +143,14 @@ class MasterEntityServiceImplTest {
     EntityCreateRequestDTO requestDTO = new EntityCreateRequestDTO();
     requestDTO.setCode("PS001");
     requestDTO.setLanguageCode("en");
-    requestDTO.setEntityType(EntityType.ROLE);
+    requestDTO.setEntityType("ROLE");
     requestDTO.setType("Role");
     requestDTO.setName("Problem Solving");
     requestDTO.setDescription("Ability to solve problems");
     requestDTO.setStatus("Active");
 
     MasterEntity mappedEntity = MasterEntity.builder()
-        .name("Problem Solving").type("Role").entityType(EntityType.ROLE)
+        .name("Problem Solving").type("Role").entityType("ROLE")
         .description("Ability to solve problems").code("PS001")
         .languageCode("en").status("Active").build();
 
@@ -294,7 +294,7 @@ class MasterEntityServiceImplTest {
     dto.setDescription("Updated description");
 
     MasterEntity existingEntity = MasterEntity.builder()
-        .code("PS001").languageCode("en").entityType(EntityType.ROLE)
+        .code("PS001").languageCode("en").entityType("ROLE")
         .name("Old Name").description("Old description").build();
 
     when(masterEntityRepository.findByCodeAndLanguageCode("PS001", "en"))
@@ -329,7 +329,7 @@ class MasterEntityServiceImplTest {
   void shouldThrowWhenNeitherLanguageNorPurgeProvided() {
     EntityDeleteRequestDTO dto = new EntityDeleteRequestDTO();
     dto.setEntityCode("R001");
-    dto.setEntityType(EntityType.ROLE);
+    dto.setEntityType("ROLE");
     // language is null, purgeAllLanguage defaults to false
 
     UpdateEntityException ex = assertThrows(UpdateEntityException.class,
@@ -344,7 +344,7 @@ class MasterEntityServiceImplTest {
   void shouldThrowWhenEntityNotFoundOnSingleDelete() {
     EntityDeleteRequestDTO dto = new EntityDeleteRequestDTO();
     dto.setEntityCode("R001");
-    dto.setEntityType(EntityType.ROLE);
+    dto.setEntityType("ROLE");
     dto.setLanguage("en");
 
     when(masterEntityRepository.findByCodeAndLanguageCode("R001", "en")).thenReturn(Optional.empty());
@@ -361,21 +361,21 @@ class MasterEntityServiceImplTest {
   void shouldDeleteEntityAndMappingsWhenLastVariant() {
     EntityDeleteRequestDTO dto = new EntityDeleteRequestDTO();
     dto.setEntityCode("R001");
-    dto.setEntityType(EntityType.ROLE);
+    dto.setEntityType("ROLE");
     dto.setLanguage("en");
 
     MasterEntity entity = MasterEntity.builder()
-        .code("R001").languageCode("en").entityType(EntityType.ROLE).build();
+        .code("R001").languageCode("en").entityType("ROLE").build();
 
     when(masterEntityRepository.findByCodeAndLanguageCode("R001", "en")).thenReturn(Optional.of(entity));
-    when(masterEntityRepository.findByCodeAndEntityType("R001", EntityType.ROLE)).thenReturn(List.of(entity));
+    when(masterEntityRepository.findByCodeAndEntityType("R001", "ROLE")).thenReturn(List.of(entity));
 
     AppResponse result = masterEntityService.deleteMasterEntities(List.of(dto));
 
     assertNotNull(result);
     assertEquals(HttpStatus.OK.getReasonPhrase(), result.getResponseCode());
-    verify(entityMapRepository, times(1)).deleteByParentEntityCodeAndParentEntityType("R001", EntityType.ROLE);
-    verify(entityMapRepository, times(1)).deleteByChildEntityCodeAndChildEntityType("R001", EntityType.ROLE);
+    verify(entityMapRepository, times(1)).deleteByParentEntityCodeAndParentEntityType("R001", "ROLE");
+    verify(entityMapRepository, times(1)).deleteByChildEntityCodeAndChildEntityType("R001", "ROLE");
     verify(masterEntityRepository, times(1)).delete(entity);
     verify(elasticSearchEntityRepository, times(1)).deleteById("R001_en");
   }
@@ -385,23 +385,23 @@ class MasterEntityServiceImplTest {
   void shouldDeleteEntityButPreserveMappingsWhenOtherVariantsExist() {
     EntityDeleteRequestDTO dto = new EntityDeleteRequestDTO();
     dto.setEntityCode("R001");
-    dto.setEntityType(EntityType.ROLE);
+    dto.setEntityType("ROLE");
     dto.setLanguage("fr");
 
     MasterEntity frEntity = MasterEntity.builder()
-        .code("R001").languageCode("fr").entityType(EntityType.ROLE).build();
+        .code("R001").languageCode("fr").entityType("ROLE").build();
     MasterEntity enEntity = MasterEntity.builder()
-        .code("R001").languageCode("en").entityType(EntityType.ROLE).build();
+        .code("R001").languageCode("en").entityType("ROLE").build();
 
     when(masterEntityRepository.findByCodeAndLanguageCode("R001", "fr")).thenReturn(Optional.of(frEntity));
-    when(masterEntityRepository.findByCodeAndEntityType("R001", EntityType.ROLE))
+    when(masterEntityRepository.findByCodeAndEntityType("R001", "ROLE"))
         .thenReturn(List.of(frEntity, enEntity));
 
     AppResponse result = masterEntityService.deleteMasterEntities(List.of(dto));
 
     assertNotNull(result);
-    verify(entityMapRepository, never()).deleteByParentEntityCodeAndParentEntityType(anyString(), any(EntityType.class));
-    verify(entityMapRepository, never()).deleteByChildEntityCodeAndChildEntityType(anyString(), any(EntityType.class));
+    verify(entityMapRepository, never()).deleteByParentEntityCodeAndParentEntityType(anyString(), anyString());
+    verify(entityMapRepository, never()).deleteByChildEntityCodeAndChildEntityType(anyString(), anyString());
     verify(masterEntityRepository, times(1)).delete(frEntity);
     verify(elasticSearchEntityRepository, times(1)).deleteById("R001_fr");
   }
@@ -411,10 +411,10 @@ class MasterEntityServiceImplTest {
   void shouldThrowWhenEntityNotFoundOnPurge() {
     EntityDeleteRequestDTO dto = new EntityDeleteRequestDTO();
     dto.setEntityCode("R999");
-    dto.setEntityType(EntityType.ROLE);
+    dto.setEntityType("ROLE");
     dto.setPurgeAllLanguage(true);
 
-    when(masterEntityRepository.findByCodeAndEntityType("R999", EntityType.ROLE)).thenReturn(List.of());
+    when(masterEntityRepository.findByCodeAndEntityType("R999", "ROLE")).thenReturn(List.of());
 
     UpdateEntityException ex = assertThrows(UpdateEntityException.class,
         () -> masterEntityService.deleteMasterEntities(List.of(dto)));
@@ -428,23 +428,23 @@ class MasterEntityServiceImplTest {
   void shouldPurgeAllLanguageVariants() {
     EntityDeleteRequestDTO dto = new EntityDeleteRequestDTO();
     dto.setEntityCode("R001");
-    dto.setEntityType(EntityType.ROLE);
+    dto.setEntityType("ROLE");
     dto.setPurgeAllLanguage(true);
 
     MasterEntity enEntity = MasterEntity.builder()
-        .code("R001").languageCode("en").entityType(EntityType.ROLE).build();
+        .code("R001").languageCode("en").entityType("ROLE").build();
     MasterEntity frEntity = MasterEntity.builder()
-        .code("R001").languageCode("fr").entityType(EntityType.ROLE).build();
+        .code("R001").languageCode("fr").entityType("ROLE").build();
     List<MasterEntity> allVariants = List.of(enEntity, frEntity);
 
-    when(masterEntityRepository.findByCodeAndEntityType("R001", EntityType.ROLE)).thenReturn(allVariants);
+    when(masterEntityRepository.findByCodeAndEntityType("R001", "ROLE")).thenReturn(allVariants);
 
     AppResponse result = masterEntityService.deleteMasterEntities(List.of(dto));
 
     assertNotNull(result);
     assertEquals(HttpStatus.OK.getReasonPhrase(), result.getResponseCode());
-    verify(entityMapRepository, times(1)).deleteByParentEntityCodeAndParentEntityType("R001", EntityType.ROLE);
-    verify(entityMapRepository, times(1)).deleteByChildEntityCodeAndChildEntityType("R001", EntityType.ROLE);
+    verify(entityMapRepository, times(1)).deleteByParentEntityCodeAndParentEntityType("R001", "ROLE");
+    verify(entityMapRepository, times(1)).deleteByChildEntityCodeAndChildEntityType("R001", "ROLE");
     verify(masterEntityRepository, times(1)).deleteAll(allVariants);
     verify(elasticSearchEntityRepository, times(1)).deleteById("R001_en");
     verify(elasticSearchEntityRepository, times(1)).deleteById("R001_fr");

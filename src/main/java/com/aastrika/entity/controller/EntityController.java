@@ -74,7 +74,7 @@ public class EntityController {
   })
   @PostMapping("/create")
   public ResponseEntity<AppResponse> create(@RequestParam("userId") String userId,
-                                            @RequestBody EntityCreateRequestDTO entityCreateRequestDTO) {
+                                            @Valid @RequestBody EntityCreateRequestDTO entityCreateRequestDTO) {
     AppResponse appResponse = masterEntityService.create(entityCreateRequestDTO, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(appResponse);
   }

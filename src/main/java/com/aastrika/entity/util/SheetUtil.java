@@ -2,15 +2,11 @@ package com.aastrika.entity.util;
 
 import com.aastrika.entity.config.EntitySheetProperties;
 import com.aastrika.entity.dto.EntitySheetRow;
-import com.aastrika.entity.model.CompetencyLevel;
-import com.aastrika.entity.model.MasterEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.poi.util.StringUtil;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.lang.NonNull;
@@ -22,27 +18,11 @@ public class SheetUtil {
 
   private final EntitySheetProperties entitySheetProperties;
 
-  private static final Map<String, BiConsumer<EntitySheetRow, String>> FIELD_SETTERS =
-      Map.of(
-          "entity_id", EntitySheetRow::setEntityId,
-          "name", EntitySheetRow::setName,
-          "description", EntitySheetRow::setDescription,
-          "code",
-              new BiConsumer<EntitySheetRow, String>() {
-                @Override
-                public void accept(EntitySheetRow entitySheetRow, String value) {
-                  entitySheetRow.setCode(value);
-                }
-              }
-          // ... add all mappings
-          );
-
   /**
-   * Maps sheet to EntitySheetRow.
-   * Uses {@link EntitySheetRow#rowNumber} for tracking.
-   *
-   * @param csvRecords It should be non-null
-   * @return
+   * Converts each CSV record into an {@link EntitySheetRow} by reading the header-to-field
+   * mappings from {@link EntitySheetProperties#getHeaderFieldMappings()}.
+   * The map key is the CSV column header name; the value is the corresponding
+   * {@link EntitySheetRow} field name used for reflection-based assignment via {@link BeanWrapper}.
    */
   public List<EntitySheetRow> mapSheetToEntitySheetRow(@NonNull List<CSVRecord> csvRecords) {
     List<EntitySheetRow> entitySheetRows = new ArrayList<>();
@@ -54,11 +34,11 @@ public class SheetUtil {
       for (Map.Entry<String, String> headerFieldEntry :
           entitySheetProperties.getHeaderFieldMappings().entrySet()) {
 
-        String headerName = headerFieldEntry.getKey();
-        String fieldName = headerFieldEntry.getValue();
+        String sheetColumnHeader = headerFieldEntry.getKey();
+        String entitySheetRowField = headerFieldEntry.getValue();
 
-        if (csvRecord.isMapped(headerName)) {
-          wrapper.setPropertyValue(fieldName, csvRecord.get(headerName));
+        if (csvRecord.isMapped(sheetColumnHeader)) {
+          wrapper.setPropertyValue(entitySheetRowField, csvRecord.get(sheetColumnHeader));
         }
       }
       /* "rowNumber" string literal is an exceptional case. It refers to

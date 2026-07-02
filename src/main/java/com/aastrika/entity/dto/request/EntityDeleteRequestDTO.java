@@ -1,8 +1,6 @@
 package com.aastrika.entity.dto.request;
 
-import com.aastrika.entity.enums.EntityType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,8 +16,8 @@ public class EntityDeleteRequestDTO {
   @Setter(AccessLevel.NONE)
   private String entityCode;
 
-  @NotNull(message = "entityType is required")
-  private EntityType entityType;
+  @NotBlank(message = "entityType is required")
+  private String entityType;
 
   private String language;
 

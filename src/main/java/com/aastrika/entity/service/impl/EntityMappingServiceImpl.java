@@ -63,6 +63,8 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     if (entityMappingRequestDTOList != null && !entityMappingRequestDTOList.isEmpty()) {
       for (EntityMappingRequestDTO entityMappingRequestDTO : entityMappingRequestDTOList) {
 
+        EntityType.validate(entityMappingRequestDTO.getParentEntityType());
+        EntityType.validate(entityMappingRequestDTO.getChildEntityType());
         validateMappingStructure(entityMappingRequestDTO.getParentEntityType(),
             entityMappingRequestDTO.getChildEntityType());
         validateEntityExists(entityMappingRequestDTO.getParentEntityCode(),
@@ -84,7 +86,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
         }
 
         EntityMap entityMap = entityMapMapper.toEntity(entityMappingRequestDTO);
-        if (EntityType.COMPETENCY == entityMappingRequestDTO.getChildEntityType()) {
+        if (EntityType.COMPETENCY.equalsIgnoreCase(entityMappingRequestDTO.getChildEntityType())) {
           entityMap.setCompetencyLevelList(getCompetencyLevelSeries(entityMappingRequestDTO.getCompetencies()));
         }
         entityMaps.add(entityMap);
@@ -96,19 +98,19 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     return List.of();
   }
 
-  private void validateMappingStructure(EntityType parentType, EntityType childType) {
-    String combination = parentType.name() + "_" + childType.name();
+  private void validateMappingStructure(String parentType, String childType) {
+    String combination = parentType.toUpperCase() + "_" + childType.toUpperCase();
     if (!allowedTypeCombinations.contains(combination)) {
       throw new UpdateEntityException(HttpStatus.BAD_REQUEST,
           "Invalid mapping structure: " + combination + ". Allowed combinations: " + allowedTypeCombinations);
     }
   }
 
-  private void validateEntityExists(String code, EntityType entityType, String role) {
+  private void validateEntityExists(String code, String entityType, String role) {
     List<MasterEntity> entities = masterEntityRepository.findByCodeAndEntityType(code, entityType);
     if (entities.isEmpty()) {
       throw new UpdateEntityException(HttpStatus.NOT_FOUND,
-          role + " entity not found with code: " + code + " and type: " + entityType.name());
+          role + " entity not found with code: " + code + " and type: " + entityType);
     }
   }
 
@@ -124,6 +126,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
 
   @Override
   public FullHierarchyNodeDTO getFullHierarchy(EntitySearchRequestDTO entitySearchRequestDTO) {
+    EntityType.validate(entitySearchRequestDTO.getEntityType());
     // Build adjacency map level by level — only loads the relevant subtree
     Map<String, List<EntityMap>> adjacencyMap = new HashMap<>();
     Set<String> allCodes = new HashSet<>();
@@ -177,7 +180,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     );
   }
 
-  private FullHierarchyNodeDTO buildNodeFromMemory(String code, EntityType entityType,
+  private FullHierarchyNodeDTO buildNodeFromMemory(String code, String entityType,
                                                    String competencyLevelList,
                                                    Map<String, List<EntityMap>> adjacencyMap,
                                                    Map<String, MasterEntity> entityLookup) {
@@ -185,14 +188,14 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     if (entity == null) return null;
 
     FullHierarchyNodeDTO node = FullHierarchyNodeDTO.builder()
-        .entityType(entityType != null ? entityType.name() : null)
+        .entityType(entityType)
         .entityCode(entity.getCode())
         .entityName(entity.getName())
         .entityDescription(entity.getDescription())
         .language(entity.getLanguageCode())
         .build();
 
-    if (EntityType.COMPETENCY == entityType && entity.getCompetencyLevels() != null) {
+    if (EntityType.COMPETENCY.equalsIgnoreCase(entityType) && entity.getCompetencyLevels() != null) {
       List<Integer> applicableLevels = convertStringifyCompetencyToInt(competencyLevelList);
       if (!applicableLevels.isEmpty()) {
         node.setCompetencies(competencyLevelMapper.toCompetencyLevelDTOList(
@@ -220,6 +223,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
    */
   @Override
   public List<HierarchyResponseDTO> getEntityMappingHierarchy(EntitySearchRequestDTO entitySearchRequestDTO) {
+    EntityType.validate(entitySearchRequestDTO.getEntityType());
     List<HierarchyResponseDTO> hierarchyResponseDTOList = new ArrayList<>();
 
     List<EntityMap> entityMapList =
@@ -267,12 +271,12 @@ public class EntityMappingServiceImpl implements EntityMappingService {
     List<EntityChildHierarchyDTO> childHierarchyList = childEntities.stream()
       .map(childEntity -> {
         EntityChildHierarchyDTO childDto = new EntityChildHierarchyDTO();
-        childDto.setEntityType(childEntity.getEntityType() != null ? childEntity.getEntityType().name() : null);
+        childDto.setEntityType(childEntity.getEntityType());
         childDto.setEntityCode(childEntity.getCode());
         childDto.setEntityName(childEntity.getName());
         childDto.setEntityDescription(childEntity.getDescription());
 
-        if (EntityType.COMPETENCY == childEntity.getEntityType()
+        if (EntityType.COMPETENCY.equalsIgnoreCase(childEntity.getEntityType())
           && childEntity.getCompetencyLevels() != null) {
           List<Integer> applicableLevels = childCompetencyMap.getOrDefault(
             childEntity.getCode().toUpperCase(), List.of());
@@ -290,7 +294,7 @@ public class EntityMappingServiceImpl implements EntityMappingService {
 
     // 5. Build and return the full hierarchy response
     return HierarchyResponseDTO.builder()
-      .entityType(parentEntity.getEntityType() != null ? parentEntity.getEntityType().name() : null)
+      .entityType(parentEntity.getEntityType())
       .entityCode(parentEntity.getCode())
       .entityName(parentEntity.getName())
       .language(parentEntity.getLanguageCode())
