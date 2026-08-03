@@ -34,6 +34,7 @@ import com.aastrika.entity.repository.es.ElasticSearchEntityRepository;
 import com.aastrika.entity.repository.jpa.EntityMapRepository;
 import com.aastrika.entity.repository.jpa.MasterEntityRepository;
 import com.aastrika.entity.service.MasterEntityEsService;
+import com.aastrika.entity.support.EntityTypeExtension;
 import com.aastrika.entity.util.EntityUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(EntityTypeExtension.class)
 class MasterEntityServiceImplTest {
 
   @Mock private MasterEntityRepository masterEntityRepository;

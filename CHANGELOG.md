@@ -5,6 +5,41 @@ Full release notes (migration steps, deployment checklist, known issues) are in 
 
 ---
 
+## [0.9.0] — 2026-08-03 · [Full Release Note](docs/release-notes/v0.9.0.md)
+
+Test coverage and static analysis baseline. Coverage raised from 37% to 88% and SonarQube reporting wired into the Maven build. No application code changed.
+
+- **Added:** `jacoco-maven-plugin 0.8.15` — coverage report generated at both `test` and `verify` phases
+- **Added:** `sonar-maven-plugin 5.7.0.6970` (pinned) and `sonar.*` properties in `pom.xml`; token supplied at run time, never stored in source
+- **Added:** `lombok.config` with `addLombokGeneratedAnnotation` — keeps Lombok-generated members out of the coverage denominator
+- **Added:** 133 tests across the `mapper`, `reader`, `util` and `controller` packages (42 → 175 total)
+- **Added:** `EntityTypeExtension` and `TestApplicationProperties` test support — bind `entity.entityTypeList` and `entity-sheet.*` from the deployed `application.properties` so tests cannot drift from config
+- **Fixed:** 16 pre-existing test failures — `EntityType`'s static type set is populated only at Spring startup, leaving it empty in Mockito-only tests
+- **Fixed:** OpenSearch search tests asserted only the mapped response, never the query built — the `strict`, blank-language and blank-query branches were unverifiable
+- **Changed:** `.gitignore` — ignore `htmlReport/` and `claude-kit/`
+
+Coverage: 88.2% (91.4% line, 79.0% branch) · Quality gate: OK · 0 bugs, 0 vulnerabilities, 0 security hotspots
+
+---
+
+## [0.8.0] — 2026-07-02 · [Full Release Note](docs/release-notes/v0.8.0.md)
+
+Completes the OpenSearch integration and expands the entity model to the full organisational and geographic hierarchy. Entity types become runtime configuration. YugabyteDB compatibility added.
+
+- **Added:** `entity.entityTypeList` property — valid entity types loaded at startup via `EntityStartupApplicationRunner`; adding a type is now a config change, not a code change
+- **Added:** Six entity types — `ORGANIZATION`, `STATE`, `DISTRICT`, `BLOCK`, `FACILITY`, `POSTING_FACILITY` — enabling geo/org hierarchy modelling
+- **Added:** `opensearch.index.master-entities` — OpenSearch index name configurable per environment via `OPENSEARCH_INDEX_MASTER_ENTITIES`
+- **Changed:** `spring-data-opensearch-starter` `1.5.3 → 1.6.0` — resolves `NoSuchMethodError` on search endpoints caused by Spring Boot 3.4.2 pulling `spring-data-elasticsearch 5.4.x`
+- **Changed:** `EntityType` refactored from Java `enum` to `final class` with a runtime-loaded type set; only `EntityType.COMPETENCY` remains a compile-time constant, all other types validated via `EntityType.validate(String)`
+- **Changed:** `entity-map.allowed-type-combinations` expanded from 3 to 9 combinations covering `ORGANIZATION → POSITION → ROLE → ACTIVITY → COMPETENCY` and `STATE → DISTRICT → BLOCK → FACILITY/POSTING_FACILITY`
+- **Changed:** `saveEntityDetailsInES` takes `userId` as a third parameter — sets `createdBy` and `createdAt` on each OpenSearch document
+- **Changed:** `EntitySheetMappingValidator` renamed to `EntityStartupApplicationRunner`, now also loading entity types at startup
+- **Changed:** ⚠ **Breaking default** — `spring.jpa.hibernate.ddl-auto` default `update → none`; `JPA_DDL_AUTO` must now be set explicitly per environment
+- **Changed:** HikariCP pool tuned for YugabyteDB stability; JDBC URL carries `socketTimeout=60`
+- **Fixed:** Test suite compilation failures on Jenkins caused by the `EntityType` enum-to-class refactor not being propagated to test classes
+
+---
+
 ## [0.7.0] — 2026-06-18 · [Full Release Note](docs/release-notes/v0.7.0.md)
 
 Developer governance and AI guardrails. Hard enforcement blocking AI agents from running git commands. Documentation reorganised for team-wide clarity.

@@ -2,7 +2,9 @@ package com.aastrika.entity.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -20,6 +22,8 @@ import com.aastrika.entity.dto.response.EntityResult;
 import com.aastrika.entity.dto.response.MasterEntitySearchResponseDTO;
 import com.aastrika.entity.mapper.MasterEntityMapper;
 import com.aastrika.entity.repository.es.ElasticSearchEntityRepository;
+import com.aastrika.entity.support.EntityTypeExtension;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentCaptor;
@@ -28,12 +32,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opensearch.common.unit.Fuzziness;
 import org.opensearch.data.client.orhlc.NativeSearchQuery;
 import org.opensearch.data.core.OpenSearchOperations;
+import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.MatchPhraseQueryBuilder;
+import org.opensearch.index.query.MatchQueryBuilder;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.index.query.TermQueryBuilder;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(EntityTypeExtension.class)
 class MasterEntityEsServiceImplTest {
 
   @Mock
@@ -98,8 +109,31 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals("en", result.getEntity().get(0).getLanguageCode())
     );
 
-    verify(openSearchOperations, times(1))
-        .search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
+    // Assert the query actually handed to OpenSearch. Without this the test passes
+    // regardless of which clauses were built.
+    BoolQueryBuilder boolQuery = capturedBoolQuery();
+
+    assertEquals(2, boolQuery.must().size(), "must → entityType filter + languageCode filter");
+    MatchQueryBuilder typeClause = assertInstanceOf(MatchQueryBuilder.class, boolQuery.must().get(0));
+    TermQueryBuilder languageClause = assertInstanceOf(TermQueryBuilder.class, boolQuery.must().get(1));
+    assertAll(
+        () -> assertEquals("entityType", typeClause.fieldName()),
+        () -> assertEquals(EntityType.COMPETENCY, typeClause.value()),
+        () -> assertEquals(Fuzziness.AUTO, typeClause.fuzziness()),
+        () -> assertEquals("languageCode", languageClause.fieldName()),
+        () -> assertEquals("en", languageClause.value())
+    );
+
+    assertEquals(2, boolQuery.should().size(), "one should clause per requested field");
+    List<String> fuzzyFields = new ArrayList<>();
+    for (QueryBuilder clause : boolQuery.should()) {
+      MatchQueryBuilder fieldClause = assertInstanceOf(MatchQueryBuilder.class, clause,
+          "strict=false must use fuzzy match, not match_phrase");
+      assertEquals(Fuzziness.AUTO, fieldClause.fuzziness());
+      fuzzyFields.add(fieldClause.fieldName());
+    }
+    assertEquals(List.of("name", "description"), fuzzyFields);
+    assertEquals("1", boolQuery.minimumShouldMatch());
   }
 
   @Test
@@ -145,8 +179,18 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals("CS001", result.getEntity().get(0).getCode())
     );
 
-    verify(openSearchOperations, times(1))
-        .search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
+    // strict=true → match_phrase clauses. This is the only behavioural difference
+    // from the fuzzy search above, so it is the one thing this test must pin down.
+    BoolQueryBuilder boolQuery = capturedBoolQuery();
+    assertEquals(1, boolQuery.should().size());
+    MatchPhraseQueryBuilder phraseClause = assertInstanceOf(
+        MatchPhraseQueryBuilder.class, boolQuery.should().get(0),
+        "strict=true must use match_phrase, not fuzzy match");
+    assertAll(
+        () -> assertEquals("name", phraseClause.fieldName()),
+        () -> assertEquals("communication skills", phraseClause.value()),
+        () -> assertEquals("1", boolQuery.minimumShouldMatch())
+    );
   }
 
   @Test
@@ -204,7 +248,13 @@ class MasterEntityEsServiceImplTest {
     assertAll(
         () -> assertEquals(2, saved.size()),
         () -> assertEquals("C001_en", saved.get(0).getId(), "ID should be code_language"),
-        () -> assertEquals("C002_en", saved.get(1).getId(), "ID should be code_language")
+        () -> assertEquals("C002_en", saved.get(1).getId(), "ID should be code_language"),
+        // The userId parameter exists so the impl can stamp createdBy/createdAt on
+        // every document — assert it, otherwise the contract is unverified.
+        () -> assertEquals("testUser", saved.get(0).getCreatedBy()),
+        () -> assertEquals("testUser", saved.get(1).getCreatedBy()),
+        () -> assertNotNull(saved.get(0).getCreatedAt(), "createdAt should be stamped"),
+        () -> assertNotNull(saved.get(1).getCreatedAt(), "createdAt should be stamped")
     );
   }
 
@@ -313,7 +363,16 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals(1, result.getCount()),
         () -> assertEquals("C001", result.getEntity().get(0).getCode())
     );
-    verify(openSearchOperations, times(1)).search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
+
+    // Blank query → no should clauses at all, so everything matching the
+    // entityType + languageCode filters comes back.
+    BoolQueryBuilder boolQuery = capturedBoolQuery();
+    assertAll(
+        () -> assertEquals(2, boolQuery.must().size(), "entityType + languageCode filters remain"),
+        () -> assertTrue(boolQuery.should().isEmpty(), "blank query must not add should clauses"),
+        () -> assertNull(boolQuery.minimumShouldMatch(),
+            "minimumShouldMatch only applies when should clauses exist")
+    );
   }
 
   @Test
@@ -346,6 +405,41 @@ class MasterEntityEsServiceImplTest {
         () -> assertEquals(1, result.getCount()),
         () -> assertEquals("R001", result.getEntity().get(0).getCode())
     );
-    verify(openSearchOperations, times(1)).search(any(NativeSearchQuery.class), eq(MasterEntityDocument.class));
+
+    // Blank language → the languageCode term filter must be omitted entirely.
+    BoolQueryBuilder boolQuery = capturedBoolQuery();
+    assertEquals(1, boolQuery.must().size(), "only the entityType filter should remain");
+    MatchQueryBuilder typeClause = assertInstanceOf(MatchQueryBuilder.class, boolQuery.must().get(0));
+    assertAll(
+        () -> assertEquals("entityType", typeClause.fieldName()),
+        () -> assertEquals("ROLE", typeClause.value()),
+        () -> assertTrue(boolQuery.must().stream().noneMatch(TermQueryBuilder.class::isInstance),
+            "no languageCode term filter should be added when language is blank")
+    );
+  }
+
+  // ─── Query capture helpers ───────────────────────────────────────────────────
+
+  /** Mirrors MasterEntityEsServiceImpl.DEFAULT_PAGE_SIZE, which is private. */
+  private static final int DEFAULT_PAGE_SIZE = 500;
+
+  /**
+   * Captures the query handed to OpenSearch and asserts the page-size cap.
+   *
+   * <p>Replaces {@code verify(...).search(any(NativeSearchQuery.class), ...)} — {@code any()}
+   * discarded the one object these tests exist to verify, so every branch of
+   * findEntitiesBySearchParameter produced an identical, unverifiable assertion.
+   */
+  private NativeSearchQuery capturedQuery() {
+    ArgumentCaptor<NativeSearchQuery> captor = ArgumentCaptor.forClass(NativeSearchQuery.class);
+    verify(openSearchOperations).search(captor.capture(), eq(MasterEntityDocument.class));
+    NativeSearchQuery query = captor.getValue();
+    assertEquals(DEFAULT_PAGE_SIZE, query.getMaxResults().intValue(),
+        "search must be capped at the default page size");
+    return query;
+  }
+
+  private BoolQueryBuilder capturedBoolQuery() {
+    return assertInstanceOf(BoolQueryBuilder.class, capturedQuery().getQuery());
   }
 }

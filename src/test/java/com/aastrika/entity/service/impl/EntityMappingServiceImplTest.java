@@ -34,6 +34,7 @@ import com.aastrika.entity.model.EntityMap;
 import com.aastrika.entity.model.MasterEntity;
 import com.aastrika.entity.repository.jpa.EntityMapRepository;
 import com.aastrika.entity.repository.jpa.MasterEntityRepository;
+import com.aastrika.entity.support.EntityTypeExtension;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -48,6 +49,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(EntityTypeExtension.class)
 class EntityMappingServiceImplTest {
 
   @Mock private EntityMapRepository entityMapRepository;

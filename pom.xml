@@ -31,6 +31,19 @@
 		<mapstruct.version>1.6.3</mapstruct.version>
 		<!-- Override Tomcat version to fix CVE-2025-24813, CVE-2025-31651, CVE-2025-55754 -->
 		<tomcat.version>10.1.36</tomcat.version>
+
+		<!-- Coverage and static analysis -->
+		<jacoco.version>0.8.15</jacoco.version>
+		<sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
+
+		<!-- SonarQube analysis.
+		     NOTE: sonar.token is deliberately NOT stored here. Per SECURITY.md 2.2 no credentials
+		     belong in source. Pass it at run time with -Dsonar.token=... or export SONAR_TOKEN.
+		     sonar.host.url defaults to the local Docker container and can be overridden with -D. -->
+		<sonar.projectKey>aastrika-entity</sonar.projectKey>
+		<sonar.projectName>aastrika-entity</sonar.projectName>
+		<sonar.host.url>http://localhost:9090</sonar.host.url>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -126,6 +139,56 @@
 						</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+
+			<!-- Code coverage. Produces target/site/jacoco/jacoco.xml, which the Sonar scanner
+			     reads via sonar.coverage.jacoco.xmlReportPaths. Without this plugin SonarQube
+			     reports 0% coverage regardless of how many tests exist. -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>jacoco-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<!-- The report is generated twice, on purpose.
+
+					     At `test`, so `mvn test` alone leaves a readable report behind. Surefire's
+					     test goal runs before this one within the same phase, so jacoco.exec is
+					     already complete by the time the report is built.
+
+					     At `verify`, because that ordering within a single phase depends on plugin
+					     declaration order and is not guaranteed across setups. The verify binding
+					     always runs after the test phase has finished, so `mvn clean verify
+					     sonar:sonar` cannot silently publish 0% coverage. Regenerating costs about
+					     100ms and is idempotent. -->
+					<execution>
+						<id>jacoco-report-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-report-verify</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Pinned so analysis is reproducible. Invoking the plugin without a version
+			     resolves whatever is newest at run time, which silently changes results. -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>${sonar-maven-plugin.version}</version>
 			</plugin>
 			</plugins>
 	</build>
