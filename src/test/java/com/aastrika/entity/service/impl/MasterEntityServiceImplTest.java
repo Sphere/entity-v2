@@ -137,6 +137,61 @@ class MasterEntityServiceImplTest {
     assertEquals(levels, mappedEntity.getCompetencyLevels());
   }
 
+  @Test
+  @DisplayName("processAndUploadSheet - should default a blank entity id to the row's code")
+  void shouldDefaultBlankEntityIdToCodeOnUpload() {
+    MultipartFile mockFile = mock(MultipartFile.class);
+    // A blank id cell reaches the service as an empty string, an absent column as null.
+    EntitySheetRow blankId = EntitySheetRow.builder()
+        .entityId("").code("R001").language("en").entityType("ROLE").name("Developer").build();
+    EntitySheetRow nullId = EntitySheetRow.builder()
+        .code("R002").language("en").entityType("ROLE").name("Tester").build();
+    EntitySheetRow whitespaceId = EntitySheetRow.builder()
+        .entityId("   ").code("R003").language("en").entityType("ROLE").name("Analyst").build();
+    EntitySheetRow suppliedId = EntitySheetRow.builder()
+        .entityId("E-9").code("R004").language("en").entityType("ROLE").name("Architect").build();
+    List<EntitySheetRow> rows = List.of(blankId, nullId, whitespaceId, suppliedId);
+    MasterEntity mappedEntity = MasterEntity.builder()
+        .code("R001").languageCode("en").entityType("ROLE").name("Developer").build();
+
+    when(entitySheetReaderFactory.getSheetReader(mockFile)).thenReturn(entitySheetReader);
+    when(entitySheetReader.getCompiledEntitySheet(mockFile)).thenReturn(Map.of("ROLE", rows));
+    when(entitySheetReader.getGlobalEntityType()).thenReturn("ROLE");
+    when(masterEntityRepository.findByCodeLanguagePairs(anyList())).thenReturn(List.of());
+    when(masterEntityMapper.toEntity(any(EntitySheetRow.class))).thenReturn(mappedEntity);
+
+    masterEntityService.processAndUploadSheet(mockFile, "admin");
+
+    assertAll(
+        () -> assertEquals("R001", blankId.getEntityId(), "an empty id takes the code"),
+        () -> assertEquals("R002", nullId.getEntityId(), "a null id takes the code"),
+        () -> assertEquals("R003", whitespaceId.getEntityId(), "a whitespace-only id takes the code"),
+        () -> assertEquals("E-9", suppliedId.getEntityId(), "an id supplied in the sheet is left alone")
+    );
+    // Same list instance reaches OpenSearch, so the index gets the defaulted ids too.
+    verify(masterEntityEsService, times(1)).saveEntityDetailsInES(rows, "ROLE", "admin");
+  }
+
+  @Test
+  @DisplayName("processAndUploadSheet - should leave the entity id blank when the row has no code")
+  void shouldNotDefaultEntityIdWhenCodeIsBlank() {
+    MultipartFile mockFile = mock(MultipartFile.class);
+    EntitySheetRow noCode = EntitySheetRow.builder()
+        .entityId("").code("").language("en").entityType("ROLE").name("Developer").build();
+    List<EntitySheetRow> rows = List.of(noCode);
+
+    when(entitySheetReaderFactory.getSheetReader(mockFile)).thenReturn(entitySheetReader);
+    when(entitySheetReader.getCompiledEntitySheet(mockFile)).thenReturn(Map.of("ROLE", rows));
+    when(entitySheetReader.getGlobalEntityType()).thenReturn("ROLE");
+    when(masterEntityRepository.findByCodeLanguagePairs(anyList())).thenReturn(List.of());
+    when(masterEntityMapper.toEntity(any(EntitySheetRow.class)))
+        .thenReturn(MasterEntity.builder().languageCode("en").entityType("ROLE").build());
+
+    masterEntityService.processAndUploadSheet(mockFile, "admin");
+
+    assertEquals("", noCode.getEntityId(), "no code means there is nothing to copy from");
+  }
+
   // ─── create ──────────────────────────────────────────────────────────────────
 
   @Test
