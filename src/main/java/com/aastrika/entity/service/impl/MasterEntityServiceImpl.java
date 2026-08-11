@@ -91,6 +91,7 @@ public class MasterEntityServiceImpl implements MasterEntityService {
       List<EntitySheetRow> entitySheetRows = entitySheetMap.get(globalEntityType.toUpperCase());
 
       checkDuplicateSheetEntries(entitySheetRows);
+      applyEntityIdDefault(entitySheetRows);
 
       for (EntitySheetRow entitySheetRow : entitySheetRows) {
         MasterEntity masterEntity = masterEntityMapper.toEntity(entitySheetRow);
@@ -112,6 +113,33 @@ public class MasterEntityServiceImpl implements MasterEntityService {
     }
 
     return entityUploadTracker;
+  }
+
+  /**
+   * Falls back to the row's code when the sheet's {@code id} column carries no value, so that
+   * {@code entity_id} is never left empty on upload.
+   *
+   * <p>Applied to the {@link EntitySheetRow} list rather than to the mapped {@link MasterEntity},
+   * because the same list also feeds
+   * {@link MasterEntityEsService#saveEntityDetailsInES(List, String, String)} — defaulting here
+   * keeps the database row and the OpenSearch document in agreement.
+   *
+   * <p>The check is on blankness, not nullness: a blank cell reaches this point as an empty string
+   * (see {@code SheetUtil#mapSheetToEntitySheetRow}), so a null check alone would never match.
+   *
+   * @param entitySheetRows rows parsed from the uploaded sheet, mutated in place
+   */
+  private void applyEntityIdDefault(List<EntitySheetRow> entitySheetRows) {
+    for (EntitySheetRow entitySheetRow : entitySheetRows) {
+      if (StringUtil.isBlank(entitySheetRow.getEntityId())
+          && !StringUtil.isBlank(entitySheetRow.getCode())) {
+
+        entitySheetRow.setEntityId(entitySheetRow.getCode());
+
+        log.debug("Row {}: blank entity id defaulted to code {}",
+          entitySheetRow.getRowNumber(), entitySheetRow.getCode());
+      }
+    }
   }
 
   /**

@@ -18,6 +18,9 @@ target/
 *.iws
 *.iml
 *.ipr
+# IntelliJ's coverage export. JaCoCo's own report goes to target/site/jacoco/,
+# which is already covered by target/ above.
+htmlReport/
 
 ### NetBeans ###
 /nbproject/private/
@@ -36,3 +39,4 @@ build/
 #.claude/settings.json
 .claude/settings.local.json
 .claude/hooks.reference.json
+claude-kit/
