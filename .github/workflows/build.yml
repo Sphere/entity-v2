@@ -21,9 +21,15 @@ jobs:
     name: Build, test and analyse
     runs-on: ubuntu-latest
 
-    # AastrikaEntityApplicationTests boots a Spring context and fails on a refused JDBC
-    # connection, so a database must be reachable. OpenSearch is NOT required — the
-    # client connects lazily and no test touches a live cluster.
+    # Throwaway containers GitHub starts before the steps run. Only
+    # AastrikaEntityApplicationTests needs them — it boots the real Spring context, which
+    # requires BOTH services reachable at startup:
+    #   - PostgreSQL: HikariCP fails fast on a refused connection.
+    #   - OpenSearch: ElasticsearchConfig declares @EnableElasticsearchRepositories, so
+    #     Spring Data builds a SimpleElasticsearchRepository whose constructor checks and
+    #     creates the index eagerly. Without a live server it throws
+    #     DataAccessResourceFailureException: Connection refused and the context fails.
+    # The other 176 tests use Mockito or MockMvc and need no external service.
     services:
       postgres:
         image: postgres:16
@@ -37,6 +43,21 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
+      opensearch:
+        image: opensearchproject/opensearch:2.18.0
+        env:
+          discovery.type: single-node
+          DISABLE_SECURITY_PLUGIN: 'true'
+          DISABLE_INSTALL_DEMO_CONFIG: 'true'
+          OPENSEARCH_JAVA_OPTS: '-Xms512m -Xmx512m'
+        ports: [ '9200:9200' ]
+        options: >-
+          --health-cmd "curl -f http://localhost:9200/_cluster/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+          --health-start-period 30s
 
     steps:
       - name: Checkout
@@ -69,6 +90,7 @@ jobs:
           DATABASE_URL: jdbc:postgresql://localhost:5432/aastrika_entity
           DATABASE_USERNAME: postgres
           DATABASE_PASSWORD: postgres
+          OPENSEARCH_URIS: http://localhost:9200
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >-
           ./mvnw -B clean verify sonar:sonar
