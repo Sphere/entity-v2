@@ -1,0 +1,110 @@
+# Build, test and publish coverage + code quality to SonarQube.
+#
+# Required repository or organisation secrets:
+#   SONAR_HOST_URL  — the org SonarQube server (must be reachable from the runner)
+#   SONAR_TOKEN     — a project analysis token for aastrika-entity, not a personal token
+#
+# Coverage comes from JaCoCo: `verify` writes target/site/jacoco/jacoco.xml, which
+# sonar-maven-plugin imports via sonar.coverage.jacoco.xmlReportPaths in pom.xml.
+
+name: Build & Sonar Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+  workflow_dispatch:        # lets you run this manually from any branch while testing
+
+jobs:
+  build:
+    name: Build, test and analyse
+    runs-on: ubuntu-latest
+
+    # Throwaway containers GitHub starts before the steps run. Only
+    # AastrikaEntityApplicationTests needs them — it boots the real Spring context, which
+    # requires BOTH services reachable at startup:
+    #   - PostgreSQL: HikariCP fails fast on a refused connection.
+    #   - OpenSearch: ElasticsearchConfig declares @EnableElasticsearchRepositories, so
+    #     Spring Data builds a SimpleElasticsearchRepository whose constructor checks and
+    #     creates the index eagerly. Without a live server it throws
+    #     DataAccessResourceFailureException: Connection refused and the context fails.
+    # The other 176 tests use Mockito or MockMvc and need no external service.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: aastrika_entity
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: [ '5432:5432' ]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      opensearch:
+        image: opensearchproject/opensearch:2.18.0
+        env:
+          discovery.type: single-node
+          DISABLE_SECURITY_PLUGIN: 'true'
+          DISABLE_INSTALL_DEMO_CONFIG: 'true'
+          OPENSEARCH_JAVA_OPTS: '-Xms512m -Xmx512m'
+        ports: [ '9200:9200' ]
+        options: >-
+          --health-cmd "curl -f http://localhost:9200/_cluster/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+          --health-start-period 30s
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history: Sonar needs git blame for new-code detection and PR analysis.
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # One command: compile, run the 175 tests, write the JaCoCo report, then analyse.
+      # sonar.host.url is passed with -D because pom.xml carries a localhost default for
+      # local runs, and a POM property would otherwise win over the environment variable.
+      # sonar.qualitygate.wait blocks until the server finishes processing and exits
+      # non-zero if the quality gate fails, so a coverage regression breaks the build.
+      - name: Build, test and analyse
+        env:
+          DATABASE_URL: jdbc:postgresql://localhost:5432/aastrika_entity
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          OPENSEARCH_URIS: http://localhost:9200
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >-
+          ./mvnw -B clean verify sonar:sonar
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+          -Dsonar.qualitygate.wait=true
+
+      # Kept on failure too, so a red build still shows which tests broke and what
+      # coverage was at the time.
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-coverage-reports
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+          retention-days: 14
